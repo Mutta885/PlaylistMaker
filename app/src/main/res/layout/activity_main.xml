@@ -53,58 +53,59 @@
             android:id="@+id/search_button"
             android:layout_width="match_parent"
             android:layout_height="@dimen/value_0"
-
-            android:layout_weight="1"
             android:layout_marginBottom="@dimen/value_16"
+            android:layout_weight="1"
             android:backgroundTint="@color/white"
+            android:insetBottom="@dimen/value_0"
+            android:insetTop="@dimen/value_0"
             android:text="@string/search"
+            android:textAllCaps="false"
             android:textColor="@color/dark"
             android:textFontWeight="500"
             android:textSize="@dimen/big_size"
             app:cornerRadius="@dimen/value_16"
             app:icon="@drawable/search"
             app:iconGravity="textStart"
+
             app:iconPadding="@dimen/value_8"
-            app:iconTint="@color/dark"
-
-
-        />
+            app:iconTint="@color/dark" />
 
         <Button
             android:id="@+id/library_button"
             android:layout_width="match_parent"
             android:layout_height="@dimen/value_0"
-
-            android:layout_weight="1"
             android:layout_marginBottom="@dimen/value_16"
+            android:layout_weight="1"
             android:backgroundTint="@color/white"
+            android:insetBottom="@dimen/value_0"
+            android:insetTop="@dimen/value_0"
             android:text="@string/library"
+            android:textAllCaps="false"
             android:textColor="@color/dark"
             android:textSize="@dimen/big_size"
             app:cornerRadius="@dimen/value_16"
             app:icon="@drawable/library"
             app:iconGravity="textStart"
             app:iconPadding="@dimen/value_8"
-            app:iconTint="@color/dark"
-            />
+            app:iconTint="@color/dark" />
 
         <Button
             android:id="@+id/settings_button"
             android:layout_width="match_parent"
             android:layout_height="@dimen/value_0"
-
             android:layout_weight="1"
-
             android:backgroundTint="@color/white"
+            android:insetBottom="@dimen/value_0"
+            android:insetTop="@dimen/value_0"
             android:text="@string/settings"
+            android:textAllCaps="false"
             android:textColor="@color/dark"
             android:textSize="@dimen/big_size"
             app:cornerRadius="@dimen/value_16"
             app:icon="@drawable/settings"
             app:iconGravity="textStart"
             app:iconPadding="@dimen/value_8"
-            app:iconTint="@color/dark"
-            />
+            app:iconTint="@color/dark" />
 
 
 
