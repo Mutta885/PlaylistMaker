@@ -18,8 +18,7 @@ class SettingsActivity : AppCompatActivity() {
         val termsOfUse = findViewById<FrameLayout>(R.id.terms_of_use)
 
         toolbarSets.setNavigationOnClickListener {
-            val mainIntent = Intent(this, MainActivity::class.java)
-            startActivity(mainIntent)
+            finish()
         }
 
         shareBtn.setOnClickListener {
