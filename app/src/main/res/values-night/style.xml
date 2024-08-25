@@ -74,7 +74,7 @@
         <item name="android:layout_marginLeft">@dimen/value_24</item>
         <item name="android:layout_marginTop">@dimen/value_102</item>
         <item name="android:drawablePadding">@dimen/value_16</item>
-        <item name="android:drawableTop">@drawable/nothing_found_dark</item>
+        <item name="android:drawableTop">@drawable/nothing_found</item>
         <item name="android:gravity">center</item>
     </style>
 
@@ -91,7 +91,7 @@
         <item name="android:layout_marginLeft">@dimen/value_24</item>
         <item name="android:layout_marginTop">@dimen/value_102</item>
         <item name="android:drawablePadding">@dimen/value_16</item>
-        <item name="android:drawableTop">@drawable/no_connection_dark</item>
+        <item name="android:drawableTop">@drawable/no_connection</item>
         <item name="android:gravity">center</item>
     </style>
 

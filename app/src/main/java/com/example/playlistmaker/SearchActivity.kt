@@ -1,7 +1,7 @@
 package com.example.playlistmaker
 
 import android.content.Context
-import android.content.Intent
+import android.graphics.drawable.Drawable
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.text.Editable
@@ -13,6 +13,7 @@ import android.widget.Button
 import android.widget.EditText
 import android.widget.ImageView
 import android.widget.TextView
+import androidx.appcompat.content.res.AppCompatResources
 import androidx.appcompat.widget.Toolbar
 import androidx.recyclerview.widget.RecyclerView
 import retrofit2.Call
@@ -146,11 +147,13 @@ class SearchActivity : AppCompatActivity() {
                     1 -> {
                         placeholderMessage.text = getString(R.string.nothing_found)
                         placeholderMessage.setTextAppearance(R.style.MyErrorStyle1)
+                        placeholderMessage.setCompoundDrawablesRelativeWithIntrinsicBounds(0,R.drawable.nothing_found,0,0)
                         updateButton.visibility = View.GONE
                     }
                     2 -> {
                         placeholderMessage.text = getString(R.string.something_went_wrong)
                         placeholderMessage.setTextAppearance(R.style.MyErrorStyle2)
+                        placeholderMessage.setCompoundDrawablesRelativeWithIntrinsicBounds(0,R.drawable.no_connection,0,0)
                         updateButton.visibility = View.VISIBLE
                     }
                 }
