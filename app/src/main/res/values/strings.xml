@@ -15,5 +15,10 @@
     <string name="album_cover">Обложка альбома</string>
     <string name="play_now">Воспроизвести</string>
     <string name="separator">*</string>
+    <string name="nothing_found">Ничего не нашлось</string>
+    <string name="something_went_wrong">Проблемы со связью\n\nЗагрузка не удалась. Проверьте\nподключение к интернету</string>
+    <string name="noConnection">noConnection</string>
+    <string name="update">Обновить</string>
+
 
 </resources>
