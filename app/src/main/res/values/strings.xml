@@ -19,6 +19,7 @@
     <string name="something_went_wrong">Проблемы со связью\n\nЗагрузка не удалась. Проверьте\nподключение к интернету</string>
     <string name="noConnection">noConnection</string>
     <string name="update">Обновить</string>
-
+    <string name="clear_history">Очистить историю</string>
+    <string name="last_search">Вы искали</string>
 
 </resources>

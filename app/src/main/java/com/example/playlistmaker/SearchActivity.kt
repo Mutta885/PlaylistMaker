@@ -5,6 +5,7 @@ import android.graphics.drawable.Drawable
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.text.Editable
+import android.text.Layout
 import android.text.TextWatcher
 import android.view.View
 import android.view.inputmethod.EditorInfo
@@ -12,10 +13,12 @@ import android.view.inputmethod.InputMethodManager
 import android.widget.Button
 import android.widget.EditText
 import android.widget.ImageView
+import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.appcompat.content.res.AppCompatResources
 import androidx.appcompat.widget.Toolbar
 import androidx.recyclerview.widget.RecyclerView
+import com.example.playlistmaker.SearchAdapter.OnClickListener
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -43,6 +46,15 @@ class SearchActivity : AppCompatActivity() {
     private val trackList = ArrayList<Track>()
     private val searchAdapter = SearchAdapter(trackList)
 
+    private lateinit var lastSearch: TextView
+    private lateinit var rvHistoryList: RecyclerView
+    private lateinit var clearHistoryBttn: Button
+    private lateinit var historyLayout: LinearLayout
+
+    private lateinit var searchHistory : SearchHistory
+
+    private lateinit var historyAdapter : SearchAdapter
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_search)
@@ -56,6 +68,42 @@ class SearchActivity : AppCompatActivity() {
         updateButton = findViewById(R.id.update_button)
 
         rvSearchTrack.adapter = searchAdapter
+
+        lastSearch = findViewById(R.id.last_search)
+        rvHistoryList = findViewById(R.id.historyList)
+        clearHistoryBttn = findViewById(R.id.clear_history_button)
+        historyLayout = findViewById(R.id.history_layout)
+
+        val sharedPrefs = getSharedPreferences(PLAYLIST_MAKER_PREFERENCES, MODE_PRIVATE)
+        searchHistory = SearchHistory(sharedPrefs)
+
+        historyAdapter = SearchAdapter(searchHistory.historyList)
+        rvHistoryList.adapter = historyAdapter
+
+        searchAdapter.setOnClickListener(object : SearchAdapter.OnClickListener {
+            override fun onClick(track: Track) {
+                searchHistory.addTrackToHistory(track)
+                historyLayout.visibility = View.GONE
+                rvSearchTrack.visibility = View.VISIBLE
+            }
+        })
+
+        historyAdapter.setOnClickListener(object : SearchAdapter.OnClickListener{
+            override fun onClick(track: Track) {
+                searchHistory.addTrackToHistory(track)
+                historyAdapter.notifyDataSetChanged()
+
+            }
+        })
+
+
+        clearHistoryBttn.setOnClickListener(){
+            searchHistory.clearHistory()
+            historyAdapter.notifyDataSetChanged()
+            historyLayout.visibility = View.GONE
+            rvSearchTrack.visibility = View.VISIBLE
+
+        }
 
         toolbarSets.setNavigationOnClickListener {
             finish()
@@ -95,7 +143,38 @@ class SearchActivity : AppCompatActivity() {
             showMessage(0)
             searchRequest()
         }
+        
+        inputEditText.setOnFocusChangeListener { v, hasFocus ->
+            showHistory (hasFocus && inputEditText.text.isEmpty() )
+        }
 
+        inputEditText.addTextChangedListener(object : TextWatcher {
+            override fun beforeTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {
+            }
+
+            override fun onTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {
+                 showHistory  (inputEditText.hasFocus() && p0?.isEmpty() == true)
+
+            }
+
+            override fun afterTextChanged(p0: Editable?) {
+            }
+        })
+
+    }
+
+    private fun showHistory(show : Boolean){
+        val sharedPrefs = getSharedPreferences(PLAYLIST_MAKER_PREFERENCES, MODE_PRIVATE)
+        val searchHistory = SearchHistory(sharedPrefs)
+        if ((show) && (searchHistory.historyList.isNotEmpty())) {
+            historyLayout.visibility = View.VISIBLE
+            rvSearchTrack.visibility = View.GONE
+            historyAdapter.notifyDataSetChanged()
+        }
+        else {
+            historyLayout.visibility = View.GONE
+            rvSearchTrack.visibility = View.VISIBLE
+        }
     }
 
     private fun searchRequest() {
