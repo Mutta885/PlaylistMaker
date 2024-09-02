@@ -9,7 +9,8 @@
 
     <application
 
-        android:name=".App"
+        android:name="com.example.playlistmaker.App"
+        android:usesCleartextTraffic="true"
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
         android:fullBackupContent="@xml/backup_rules"
@@ -18,7 +19,6 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Base.Theme.PlaylistMaker"
-        android:usesCleartextTraffic="true"
         android:networkSecurityConfig="@xml/network_security_config"
 
 
