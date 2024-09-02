@@ -25,6 +25,7 @@
     <dimen name="tiny_size">11sp</dimen>
     <dimen name="error_size">19sp</dimen>
     <dimen name="update_size">14sp</dimen>
+    <dimen name="info_size">13sp</dimen>
 
     <dimen name="album_radius">2dp</dimen>
     <dimen name="album_side">45dp</dimen>

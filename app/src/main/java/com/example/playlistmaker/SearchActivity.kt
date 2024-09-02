@@ -1,6 +1,7 @@
 package com.example.playlistmaker
 
 import android.content.Context
+import android.content.Intent
 import android.graphics.drawable.Drawable
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
@@ -80,11 +81,15 @@ class SearchActivity : AppCompatActivity() {
         historyAdapter = SearchAdapter(searchHistory.historyList)
         rvHistoryList.adapter = historyAdapter
 
+        val playerIntent = Intent(this, Player::class.java)
+
         searchAdapter.setOnClickListener(object : SearchAdapter.OnClickListener {
             override fun onClick(track: Track) {
                 searchHistory.addTrackToHistory(track)
                 historyLayout.visibility = View.GONE
                 rvSearchTrack.visibility = View.VISIBLE
+
+                startActivity(playerIntent)
             }
         })
 
@@ -92,6 +97,8 @@ class SearchActivity : AppCompatActivity() {
             override fun onClick(track: Track) {
                 searchHistory.addTrackToHistory(track)
                 historyAdapter.notifyDataSetChanged()
+
+                startActivity(playerIntent)
 
             }
         })
