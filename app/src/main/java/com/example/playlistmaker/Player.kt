@@ -2,6 +2,7 @@ package com.example.playlistmaker
 
 import android.icu.text.SimpleDateFormat
 import android.os.Bundle
+import android.view.View
 import android.widget.Button
 import android.widget.ImageView
 import android.widget.TextView
@@ -17,6 +18,7 @@ class Player : AppCompatActivity() {
 
     private lateinit var cover: ImageView
     private lateinit var trackTimeValue: TextView
+    private lateinit var albumTitle: TextView
     private lateinit var albumValue: TextView
     private lateinit var yearValue: TextView
     private lateinit var genreValue: TextView
@@ -24,20 +26,23 @@ class Player : AppCompatActivity() {
     private lateinit var menu_button: ImageView
     private lateinit var trackName: TextView
     private lateinit var artistName: TextView
+    private lateinit var timerValue: TextView
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        enableEdgeToEdge()
+        //enableEdgeToEdge()
         setContentView(R.layout.activity_player)
 
         cover = findViewById(R.id.cover)
         menu_button = findViewById(R.id.menu_button)
         trackTimeValue = findViewById(R.id.trackTimeValue)
+        albumTitle = findViewById(R.id.albumTitle)
         albumValue = findViewById(R.id.albumValue)
         yearValue = findViewById(R.id.yearValue)
         genreValue = findViewById(R.id.genreValue)
         countryValue = findViewById(R.id.countryValue)
-
+        timerValue = findViewById(R.id.timer)
         trackName = findViewById(R.id.trackName)
         artistName = findViewById(R.id.artistName)
 
@@ -49,16 +54,23 @@ class Player : AppCompatActivity() {
             finish()
         }
 
-
-        //trackTimeTitle.text = currentTrack.trackName
+        timerValue.text = "0:00"
         trackTimeValue.text = SimpleDateFormat("mm:ss", Locale.getDefault()).format(currentTrack.trackTime)
-        //albumTitle.text = currentTrack.collectionName
-        albumValue.text = currentTrack.collectionName
-        //yearTitle.text =
-        yearValue.text = currentTrack.releaseDate.toString()
-        //genreTitle.text =
+
+        val albumTemp = currentTrack.collectionName
+        if (albumTemp.isEmpty()){
+            albumValue.visibility = View.GONE
+            albumTitle.visibility = View.GONE
+        }
+        else {
+            albumValue.visibility = View.VISIBLE
+            albumTitle.visibility = View.VISIBLE
+            albumValue.text = albumTemp
+        }
+
+
+        yearValue.text = currentTrack.releaseDate.take(4)
         genreValue.text = currentTrack.primaryGenreName
-        //countryTitle.text =
         countryValue.text = currentTrack.country
 
         trackName.text = currentTrack.trackName

@@ -24,6 +24,16 @@
     <string name="return_btn">Назад</string>
     <string name="track_name">Название композиции</string>
     <string name="artistName">Имя исполнителя</string>
+    <string name="to_playlist">Добавить в плейлист</string>
+    <string name="to_favorite">Добавить в избранное</string>
+    <string name="track_time">Длительность</string>
+    <string name="album">Альбом</string>
+    <string name="year">Год</string>
+    <string name="genre">Жанр</string>
+    <string name="country">Страна</string>
+    <string name="start_timer">0:00</string>
+
+
 
 
 </resources>
