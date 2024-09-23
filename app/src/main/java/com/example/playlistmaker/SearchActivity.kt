@@ -1,12 +1,14 @@
 package com.example.playlistmaker
 
 import android.content.Context
+import android.content.Intent
 import android.graphics.drawable.Drawable
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.text.Editable
 import android.text.Layout
 import android.text.TextWatcher
+import android.util.Log
 import android.view.View
 import android.view.inputmethod.EditorInfo
 import android.view.inputmethod.InputMethodManager
@@ -80,11 +82,15 @@ class SearchActivity : AppCompatActivity() {
         historyAdapter = SearchAdapter(searchHistory.historyList)
         rvHistoryList.adapter = historyAdapter
 
+        val playerIntent = Intent(this, Player::class.java)
+
         searchAdapter.setOnClickListener(object : SearchAdapter.OnClickListener {
             override fun onClick(track: Track) {
                 searchHistory.addTrackToHistory(track)
                 historyLayout.visibility = View.GONE
                 rvSearchTrack.visibility = View.VISIBLE
+
+                startActivity(playerIntent)
             }
         })
 
@@ -92,6 +98,8 @@ class SearchActivity : AppCompatActivity() {
             override fun onClick(track: Track) {
                 searchHistory.addTrackToHistory(track)
                 historyAdapter.notifyDataSetChanged()
+
+                startActivity(playerIntent)
 
             }
         })
@@ -201,7 +209,10 @@ class SearchActivity : AppCompatActivity() {
                 }
 
                 override fun onFailure(call: Call<SongsResponse>, t: Throwable) {
+
+                    Log.d("TAG", "onFailure: $t")
                     showMessage(2)
+
                 }
 
             })

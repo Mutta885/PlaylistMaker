@@ -5,7 +5,7 @@ import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 
 
-const val HISTORY_MAX_SIZE = 10
+private const val HISTORY_MAX_SIZE = 10
 
 class SearchHistory (sharedPrefs : SharedPreferences){
 
@@ -22,8 +22,6 @@ class SearchHistory (sharedPrefs : SharedPreferences){
 
         for (i in historyList.indices) {
             if (historyList[i].trackId == track.trackId) {
-                //trackFound = true
-                //trackIndex = i
                 historyList.removeAt(i)
                 break
             }
