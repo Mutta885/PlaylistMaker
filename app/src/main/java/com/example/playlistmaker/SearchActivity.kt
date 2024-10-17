@@ -5,6 +5,8 @@ import android.content.Intent
 import android.graphics.drawable.Drawable
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.text.Editable
 import android.text.Layout
 import android.text.TextWatcher
@@ -16,6 +18,7 @@ import android.widget.Button
 import android.widget.EditText
 import android.widget.ImageView
 import android.widget.LinearLayout
+import android.widget.ProgressBar
 import android.widget.TextView
 import androidx.appcompat.content.res.AppCompatResources
 import androidx.appcompat.widget.Toolbar
@@ -57,6 +60,8 @@ class SearchActivity : AppCompatActivity() {
 
     private lateinit var historyAdapter : SearchAdapter
 
+    private lateinit var progressBar : ProgressBar
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_search)
@@ -68,6 +73,8 @@ class SearchActivity : AppCompatActivity() {
         rvSearchTrack = findViewById(R.id.trackList)
         placeholderMessage = findViewById(R.id.search_error)
         updateButton = findViewById(R.id.update_button)
+
+        progressBar = findViewById(R.id.progressBar)
 
         rvSearchTrack.adapter = searchAdapter
 
@@ -89,8 +96,9 @@ class SearchActivity : AppCompatActivity() {
                 searchHistory.addTrackToHistory(track)
                 historyLayout.visibility = View.GONE
                 rvSearchTrack.visibility = View.VISIBLE
-
-                startActivity(playerIntent)
+                if (clickDebounce()) {
+                    startActivity(playerIntent)
+                }
             }
         })
 
@@ -99,7 +107,9 @@ class SearchActivity : AppCompatActivity() {
                 searchHistory.addTrackToHistory(track)
                 historyAdapter.notifyDataSetChanged()
 
-                startActivity(playerIntent)
+                if (clickDebounce()) {
+                    startActivity(playerIntent)
+                }
 
             }
         })
@@ -131,6 +141,7 @@ class SearchActivity : AppCompatActivity() {
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
 
                 clearButton.visibility = clearButtonVisibility(s)
+                searchDebounce()
             }
 
             override fun afterTextChanged(s: Editable?) {
@@ -187,11 +198,15 @@ class SearchActivity : AppCompatActivity() {
 
     private fun searchRequest() {
         if (inputEditText.text.isNotEmpty()) {
+
+            progressBar.visibility = View.VISIBLE
+
             iTunesService.search(inputEditText.text.toString()).enqueue(object :
                 Callback<SongsResponse> {
                 override fun onResponse(call: Call<SongsResponse>,
                                         response: Response<SongsResponse>
                 ) {
+                    progressBar.visibility = View.GONE
                     if (response.code() == 200) {
                         trackList.clear()
                         if (response.body()?.results?.isNotEmpty() == true) {
@@ -209,7 +224,7 @@ class SearchActivity : AppCompatActivity() {
                 }
 
                 override fun onFailure(call: Call<SongsResponse>, t: Throwable) {
-
+                    progressBar.visibility = View.GONE
                     Log.d("TAG", "onFailure: $t")
                     showMessage(2)
 
@@ -218,6 +233,27 @@ class SearchActivity : AppCompatActivity() {
             })
         }
 
+    }
+
+
+    private var isClickAllowed = true
+
+    private val handler = Handler(Looper.getMainLooper())
+
+    private fun clickDebounce() : Boolean {
+        val current = isClickAllowed
+        if (isClickAllowed) {
+            isClickAllowed = false
+            handler.postDelayed({ isClickAllowed = true }, CLICK_DEBOUNCE_DELAY)
+        }
+        return current
+    }
+
+    private val searchRunnable = Runnable { searchRequest() }
+
+    private fun searchDebounce() {
+        handler.removeCallbacks(searchRunnable)
+        handler.postDelayed(searchRunnable, SEARCH_DEBOUNCE_DELAY)
     }
 
     private fun showMessage(code: Int) {
@@ -271,6 +307,9 @@ class SearchActivity : AppCompatActivity() {
     companion object {
         private const val SEARCH_STRING = "SEARCH_STRING"
         val SEARCH_DEF = ""
+
+        private const val CLICK_DEBOUNCE_DELAY = 1000L
+        private const val SEARCH_DEBOUNCE_DELAY = 2000L
     }
 
     override fun onRestoreInstanceState(savedInstanceState: Bundle) {

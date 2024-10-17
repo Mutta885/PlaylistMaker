@@ -29,6 +29,7 @@
     <dimen name="value_100">100dp</dimen>
     <dimen name="value_102">102dp</dimen>
     <dimen name="value_130">130dp</dimen>
+    <dimen name="value_140">140dp</dimen>
 
     <dimen name="small_size">16sp</dimen>
     <dimen name="big_size">22sp</dimen>
