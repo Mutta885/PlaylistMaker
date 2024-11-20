@@ -12,6 +12,7 @@ data class Track (
     val collectionName: String,     // Название альбома
     val releaseDate: String,        // Год релиза трека
     val primaryGenreName: String,   // Жанр трека
-    val country: String             // Страна исполнителя
+    val country: String,            // Страна исполнителя
+    val previewUrl : String         // Ссылка на отрывок трека
 
 )
