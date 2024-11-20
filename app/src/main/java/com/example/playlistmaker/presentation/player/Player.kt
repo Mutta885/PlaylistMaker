@@ -1,4 +1,4 @@
-package com.example.playlistmaker
+package com.example.playlistmaker.presentation.player
 
 import android.icu.text.SimpleDateFormat
 import android.media.MediaPlayer
@@ -6,13 +6,15 @@ import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.view.View
-import android.widget.Button
 import android.widget.ImageButton
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.resource.bitmap.RoundedCorners
+import com.example.playlistmaker.R
+import com.example.playlistmaker.domain.models.Track
+import com.example.playlistmaker.Creator
 import java.util.Locale
 
 class Player : AppCompatActivity() {
@@ -44,6 +46,8 @@ class Player : AppCompatActivity() {
 
     private var mainThreadHandler: Handler? = null
 
+    private var historyInteractor = Creator.provideHistoryInteractor()
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_player)
@@ -63,8 +67,7 @@ class Player : AppCompatActivity() {
         artistName = findViewById(R.id.artistName)
 
 
-        val sharedPrefs = getSharedPreferences(PLAYLIST_MAKER_PREFERENCES, MODE_PRIVATE)
-        val currentTrack : Track = SearchHistory(sharedPrefs).historyList[0]
+        val currentTrack : Track = historyInteractor.getHistory()[0]
         url = currentTrack.previewUrl
         preparePlayer()
 
@@ -104,17 +107,18 @@ class Player : AppCompatActivity() {
             .dontAnimate()
             .into(cover)
 
-
-
     }
 
     override fun onPause() {
         super.onPause()
-        pausePlayer()
+        if (mediaPlayer.isPlaying()) {
+            pausePlayer()
+        }
     }
 
     override fun onDestroy() {
         mainThreadHandler?.removeCallbacksAndMessages(null)
+        mediaPlayer.stop()
         mediaPlayer.release()
         super.onDestroy()
     }
