@@ -1,14 +1,12 @@
-package com.example.playlistmaker
+package com.example.playlistmaker.presentation.search
 
 import android.content.Context
 import android.content.Intent
-import android.graphics.drawable.Drawable
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.text.Editable
-import android.text.Layout
 import android.text.TextWatcher
 import android.util.Log
 import android.view.View
@@ -20,28 +18,17 @@ import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.ProgressBar
 import android.widget.TextView
-import androidx.appcompat.content.res.AppCompatResources
 import androidx.appcompat.widget.Toolbar
 import androidx.recyclerview.widget.RecyclerView
-import com.example.playlistmaker.SearchAdapter.OnClickListener
-import retrofit2.Call
-import retrofit2.Callback
-import retrofit2.Response
-import retrofit2.Retrofit
-import retrofit2.converter.gson.GsonConverterFactory
+import com.example.playlistmaker.Creator
+import com.example.playlistmaker.presentation.player.Player
+import com.example.playlistmaker.R
+import com.example.playlistmaker.domain.api.TracksInteractor
+import com.example.playlistmaker.domain.models.Track
 
 class SearchActivity : AppCompatActivity() {
 
     private var searchSavedString: String = SEARCH_DEF
-
-    private val iTunesBaseUrl = "https://itunes.apple.com"
-
-    private val retrofit = Retrofit.Builder()
-        .baseUrl(iTunesBaseUrl)
-        .addConverterFactory(GsonConverterFactory.create())
-        .build()
-
-    private val iTunesService = retrofit.create(iTunesApi::class.java)
 
     private lateinit var updateButton: Button
     private lateinit var placeholderMessage: TextView
@@ -56,11 +43,13 @@ class SearchActivity : AppCompatActivity() {
     private lateinit var clearHistoryBttn: Button
     private lateinit var historyLayout: LinearLayout
 
-    private lateinit var searchHistory : SearchHistory
+    private val searchHistory = Creator.provideHistoryInteractor()
 
     private lateinit var historyAdapter : SearchAdapter
 
     private lateinit var progressBar : ProgressBar
+
+    private val tracksInteractor = Creator.provideTracksInteractor()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -83,10 +72,7 @@ class SearchActivity : AppCompatActivity() {
         clearHistoryBttn = findViewById(R.id.clear_history_button)
         historyLayout = findViewById(R.id.history_layout)
 
-        val sharedPrefs = getSharedPreferences(PLAYLIST_MAKER_PREFERENCES, MODE_PRIVATE)
-        searchHistory = SearchHistory(sharedPrefs)
-
-        historyAdapter = SearchAdapter(searchHistory.historyList)
+        historyAdapter = SearchAdapter(searchHistory.getHistory())
         rvHistoryList.adapter = historyAdapter
 
         val playerIntent = Intent(this, Player::class.java)
@@ -102,7 +88,7 @@ class SearchActivity : AppCompatActivity() {
             }
         })
 
-        historyAdapter.setOnClickListener(object : SearchAdapter.OnClickListener{
+        historyAdapter.setOnClickListener(object : SearchAdapter.OnClickListener {
             override fun onClick(track: Track) {
                 searchHistory.addTrackToHistory(track)
                 historyAdapter.notifyDataSetChanged()
@@ -131,6 +117,7 @@ class SearchActivity : AppCompatActivity() {
             inputEditText.setText("")
             val inputMethodManager = getSystemService(Context.INPUT_METHOD_SERVICE) as? InputMethodManager
             inputMethodManager?.hideSoftInputFromWindow(inputEditText.windowToken, 0)
+            showMessage(0)
         }
 
         val myTextWatcher = object : TextWatcher {
@@ -183,9 +170,7 @@ class SearchActivity : AppCompatActivity() {
     }
 
     private fun showHistory(show : Boolean){
-        val sharedPrefs = getSharedPreferences(PLAYLIST_MAKER_PREFERENCES, MODE_PRIVATE)
-        val searchHistory = SearchHistory(sharedPrefs)
-        if ((show) && (searchHistory.historyList.isNotEmpty())) {
+         if ((show) && (searchHistory.getHistory().isNotEmpty())) {
             historyLayout.visibility = View.VISIBLE
             rvSearchTrack.visibility = View.GONE
             historyAdapter.notifyDataSetChanged()
@@ -198,41 +183,33 @@ class SearchActivity : AppCompatActivity() {
 
     private fun searchRequest() {
         if (inputEditText.text.isNotEmpty()) {
-
             progressBar.visibility = View.VISIBLE
 
-            iTunesService.search(inputEditText.text.toString()).enqueue(object :
-                Callback<SongsResponse> {
-                override fun onResponse(call: Call<SongsResponse>,
-                                        response: Response<SongsResponse>
-                ) {
-                    progressBar.visibility = View.GONE
-                    if (response.code() == 200) {
-                        trackList.clear()
-                        if (response.body()?.results?.isNotEmpty() == true) {
-                            trackList.addAll(response.body()?.results!!)
-                            searchAdapter.notifyDataSetChanged()
+            tracksInteractor.searchTracks(inputEditText.text.toString(),
+                object : TracksInteractor.TracksConsumer {
+                    override fun consume(foundTracks: List<Track>) {
+                        runOnUiThread {
+                            progressBar.visibility = View.GONE
+                            trackList.clear()
+
+                            if (foundTracks.isNotEmpty()) {
+                                showMessage(0)
+                                trackList.addAll(foundTracks)
+                                searchAdapter.notifyDataSetChanged()
+                            } else {
+                                showMessage(1)
+                            }
                         }
-                        if (trackList.isEmpty()) {
-                            showMessage(1)
-                        } else {
-                            showMessage(0)
-                        }
-                    } else {
-                        showMessage(2)
                     }
-                }
-
-                override fun onFailure(call: Call<SongsResponse>, t: Throwable) {
-                    progressBar.visibility = View.GONE
-                    Log.d("TAG", "onFailure: $t")
-                    showMessage(2)
-
-                }
-
-            })
+                    override fun onFailure(t: Throwable) {
+                        runOnUiThread {
+                            progressBar.visibility = View.GONE
+                            Log.d("TAG", "onFailure: $t")
+                            showMessage(2)
+                        }
+                    }
+                })
         }
-
     }
 
 
@@ -264,7 +241,6 @@ class SearchActivity : AppCompatActivity() {
                 updateButton.visibility = View.GONE
             }
             else {
-
                 placeholderMessage.visibility = View.VISIBLE
                 rvSearchTrack.visibility = View.GONE
                 trackList.clear()
@@ -273,22 +249,20 @@ class SearchActivity : AppCompatActivity() {
                     1 -> {
                         placeholderMessage.text = getString(R.string.nothing_found)
                         placeholderMessage.setTextAppearance(R.style.MyErrorStyle1)
-                        placeholderMessage.setCompoundDrawablesRelativeWithIntrinsicBounds(0,R.drawable.nothing_found,0,0)
+                        placeholderMessage.setCompoundDrawablesRelativeWithIntrinsicBounds(0,
+                            R.drawable.nothing_found,0,0)
                         updateButton.visibility = View.GONE
                     }
                     2 -> {
                         placeholderMessage.text = getString(R.string.something_went_wrong)
                         placeholderMessage.setTextAppearance(R.style.MyErrorStyle2)
-                        placeholderMessage.setCompoundDrawablesRelativeWithIntrinsicBounds(0,R.drawable.no_connection,0,0)
+                        placeholderMessage.setCompoundDrawablesRelativeWithIntrinsicBounds(0,
+                            R.drawable.no_connection,0,0)
                         updateButton.visibility = View.VISIBLE
                     }
                 }
             }
-
     }
-
-
-
 
     private fun clearButtonVisibility(s: CharSequence?): Int {
         return if (s.isNullOrEmpty()) {
@@ -299,7 +273,6 @@ class SearchActivity : AppCompatActivity() {
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
-
         outState.putString(SEARCH_STRING, searchSavedString)
         super.onSaveInstanceState(outState)
     }

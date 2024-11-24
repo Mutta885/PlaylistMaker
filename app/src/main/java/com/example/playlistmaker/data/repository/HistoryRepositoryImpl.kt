@@ -1,16 +1,20 @@
-package com.example.playlistmaker
+package com.example.playlistmaker.data.repository
 
 import android.content.SharedPreferences
+import com.example.playlistmaker.domain.api.HistoryRepository
+import com.example.playlistmaker.domain.models.Track
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 
+class HistoryRepositoryImpl (sharedPreferences: SharedPreferences) : HistoryRepository {
 
-private const val HISTORY_MAX_SIZE = 10
+    private companion object {
+        const val HISTORY_LIST = "history_list"
+        const val HISTORY_MAX_SIZE = 10
+    }
 
-class SearchHistory (sharedPrefs : SharedPreferences){
-
-    private val sharedPreferences = sharedPrefs
-    var historyList : ArrayList<Track> = arrayListOf()
+    private val sharedPrefs = sharedPreferences
+    private var historyList : ArrayList<Track> = arrayListOf()
 
     private var gson = Gson()
 
@@ -18,7 +22,7 @@ class SearchHistory (sharedPrefs : SharedPreferences){
         updateHistory()
     }
 
-    fun addTrackToHistory(track : Track){
+    override fun addTrackToHistory(track : Track){
 
         for (i in historyList.indices) {
             if (historyList[i].trackId == track.trackId) {
@@ -36,24 +40,28 @@ class SearchHistory (sharedPrefs : SharedPreferences){
         syncHistory()
     }
 
-    fun clearHistory(){
+    override fun clearHistory(){
         historyList.clear()
         syncHistory()
     }
 
-    fun updateHistory() {
-        val jsonString = sharedPreferences.getString(HISTORY_LIST, null)
+    override fun updateHistory() {
+        val jsonString = sharedPrefs.getString(HISTORY_LIST, null)
         if (jsonString != null) {
             val typeToken = object : TypeToken<ArrayList<Track>>() {}.type
             historyList = gson.fromJson(jsonString, typeToken)
         }
     }
 
-    fun syncHistory(){
+    private fun syncHistory(){
         val json = gson.toJson(historyList)
-        sharedPreferences.edit()
+        sharedPrefs.edit()
             .putString(HISTORY_LIST, json)
             .apply()
+    }
+
+    override fun getHistory(): List<Track>{
+        return historyList
     }
 
 }
