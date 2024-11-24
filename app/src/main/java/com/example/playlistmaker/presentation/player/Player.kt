@@ -1,7 +1,6 @@
 package com.example.playlistmaker.presentation.player
 
 import android.icu.text.SimpleDateFormat
-import android.media.MediaPlayer
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
@@ -13,21 +12,11 @@ import androidx.appcompat.app.AppCompatActivity
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.resource.bitmap.RoundedCorners
 import com.example.playlistmaker.R
-import com.example.playlistmaker.domain.models.Track
 import com.example.playlistmaker.Creator
+import com.example.playlistmaker.domain.api.PlayerInteractor
 import java.util.Locale
 
 class Player : AppCompatActivity() {
-
-    companion object {
-        private const val STATE_DEFAULT = 0
-        private const val STATE_PREPARED = 1
-        private const val STATE_PLAYING = 2
-        private const val STATE_PAUSED = 3
-        private const val DELAY = 500L
-    }
-
-    private var playerState = STATE_DEFAULT
 
     private lateinit var cover: ImageView
     private lateinit var trackTimeValue: TextView
@@ -40,13 +29,10 @@ class Player : AppCompatActivity() {
     private lateinit var trackName: TextView
     private lateinit var artistName: TextView
     private lateinit var timerValue: TextView
-    private var mediaPlayer = MediaPlayer()
-    private lateinit var url : String
     private lateinit var playButton: ImageButton
 
+    private lateinit var playerInteractor: PlayerInteractor
     private var mainThreadHandler: Handler? = null
-
-    private var historyInteractor = Creator.provideHistoryInteractor()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -66,10 +52,10 @@ class Player : AppCompatActivity() {
         trackName = findViewById(R.id.trackName)
         artistName = findViewById(R.id.artistName)
 
-
-        val currentTrack : Track = historyInteractor.getHistory()[0]
-        url = currentTrack.previewUrl
+        playerInteractor = Creator.providePlayerInteractor()
         preparePlayer()
+        val currentTrack= playerInteractor.getCrrntTrack()
+        val albumTemp = currentTrack.collectionName
 
         menu_button.setOnClickListener(){
             finish()
@@ -78,8 +64,7 @@ class Player : AppCompatActivity() {
         timerValue.text = "00:00"
         trackTimeValue.text = SimpleDateFormat("mm:ss", Locale.getDefault()).format(currentTrack.trackTime)
 
-        val albumTemp = currentTrack.collectionName
-        if (albumTemp.isEmpty()){
+         if (albumTemp.isEmpty()){
             albumValue.visibility = View.GONE
             albumTitle.visibility = View.GONE
         }
@@ -89,14 +74,11 @@ class Player : AppCompatActivity() {
             albumValue.text = albumTemp
         }
 
-
         yearValue.text = currentTrack.releaseDate.take(4)
         genreValue.text = currentTrack.primaryGenreName
         countryValue.text = currentTrack.country
-
         trackName.text = currentTrack.trackName
         artistName.text = currentTrack.artistName
-
         val bigCover = currentTrack.artworkUrl100.replaceAfterLast('/',"512x512bb.jpg")
 
         Glide.with(applicationContext)
@@ -106,88 +88,64 @@ class Player : AppCompatActivity() {
             .transform(RoundedCorners(applicationContext.resources.getDimensionPixelSize(R.dimen.value_8)))
             .dontAnimate()
             .into(cover)
-
     }
 
     override fun onPause() {
         super.onPause()
-        if (mediaPlayer.isPlaying()) {
-            pausePlayer()
-        }
+        playerInteractor.pausePlayer()
     }
 
     override fun onDestroy() {
         mainThreadHandler?.removeCallbacksAndMessages(null)
-        mediaPlayer.stop()
-        mediaPlayer.release()
+        playerInteractor.destroyPlayer()
         super.onDestroy()
     }
 
     private fun preparePlayer() {
-
         playButton = findViewById(R.id.playButton)
-        playButton.setOnClickListener(){
-                playbackControl()
-                timerControl()
-        }
-        mediaPlayer.setDataSource(url)
-        mediaPlayer.prepareAsync()
-        mediaPlayer.setOnPreparedListener {
-            playButton.setImageResource(R.drawable.play)
-            playerState = STATE_PREPARED
-        }
-        mediaPlayer.setOnCompletionListener {
-            playButton.setImageResource(R.drawable.play)
-            playerState = STATE_PREPARED
+        playerInteractor.preparePlayer {
             mainThreadHandler?.removeCallbacksAndMessages(null)
             timerValue.text = "00:00"
+            playButton.setImageResource(R.drawable.play)
         }
-    }
 
-    private fun startPlayer() {
-        mediaPlayer.start()
-        playButton.setImageResource(R.drawable.pause)
-        playerState = STATE_PLAYING
-    }
-
-    private fun pausePlayer() {
-        mediaPlayer.pause()
-        playButton.setImageResource(R.drawable.play)
-        playerState = STATE_PAUSED
-    }
-
-    private fun playbackControl() {
-        when(playerState) {
-            STATE_PLAYING -> {
-                pausePlayer()
-            }
-            STATE_PREPARED, STATE_PAUSED -> {
-                startPlayer()
+        playButton.setOnClickListener(){
+            playerInteractor.playbackControl()
+            timerControl()
+            when (playerInteractor.getPlayBttnState()) {
+                true -> playButton.setImageResource(R.drawable.play)
+                else -> playButton.setImageResource(R.drawable.pause)
             }
         }
     }
 
     private fun timerControl(){
-        when(playerState) {
+        when(playerInteractor.getPlayerState()) {
             STATE_PLAYING -> {
-                mainThreadHandler?.post(
-                    createUpdateTimerTask()
-                )
+                mainThreadHandler?.post(createUpdateTimerTask())
             }
             STATE_PAUSED -> {
                 mainThreadHandler?.removeCallbacks(createUpdateTimerTask())
             }
+
         }
     }
 
     private fun createUpdateTimerTask(): Runnable {
         return object : Runnable {
             override fun run() {
-                timerValue.text = SimpleDateFormat("mm:ss", Locale.getDefault()).format(mediaPlayer.currentPosition)
+                timerValue.text = SimpleDateFormat("mm:ss", Locale.getDefault()).format(playerInteractor.getMediaPlayerTimer())
                 mainThreadHandler?.postDelayed(this, DELAY)
             }
         }
     }
 
+    companion object {
+        private const val STATE_DEFAULT = 0
+        private const val STATE_PREPARED = 1
+        private const val STATE_PLAYING = 2
+        private const val STATE_PAUSED = 3
+        private const val DELAY = 500L
+    }
 
 }

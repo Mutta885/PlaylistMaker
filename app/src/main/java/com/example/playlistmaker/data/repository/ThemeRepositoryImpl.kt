@@ -1,19 +1,19 @@
 package com.example.playlistmaker.data.repository
 
-import android.app.Application
-import android.content.Context.MODE_PRIVATE
+import android.content.SharedPreferences
 import androidx.appcompat.app.AppCompatDelegate
 import com.example.playlistmaker.domain.api.ThemeRepository
 
-class ThemeRepositoryImpl(application: Application) : ThemeRepository {
+class ThemeRepositoryImpl(sharedPreferences: SharedPreferences, isSystemDarkTheme: Boolean) : ThemeRepository {
 
     private companion object {
-        const val PLAYLIST_MAKER_PREFERENCES = "playlist_maker_preferences"
         const val DARK_THEME_KEY = "dark_theme_key"
     }
 
-    private val sharedPrefs = application.getSharedPreferences(PLAYLIST_MAKER_PREFERENCES, MODE_PRIVATE)
+    private val sharedPrefs = sharedPreferences
     private var darkTheme = false
+    private val sysTheme = isSystemDarkTheme
+
 
     override fun getTheme(): Boolean {
         return sharedPrefs.getBoolean(DARK_THEME_KEY, darkTheme)
@@ -39,7 +39,12 @@ class ThemeRepositoryImpl(application: Application) : ThemeRepository {
     }
 
     override fun initTheme(){
-        switchTheme(getTheme())
+        if (sharedPrefs.contains(DARK_THEME_KEY)){
+            switchTheme(getTheme())
+        } else {
+            switchTheme(sysTheme)
+            setTheme(sysTheme)
+        }
     }
 
 
