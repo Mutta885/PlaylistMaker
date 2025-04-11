@@ -4,6 +4,7 @@ import android.icu.text.SimpleDateFormat
 import android.os.Bundle
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.isVisible
 import androidx.lifecycle.ViewModelProvider
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.resource.bitmap.RoundedCorners
@@ -34,13 +35,12 @@ class Player : AppCompatActivity() {
                     binding.trackTimeValue.text = SimpleDateFormat("mm:ss", Locale.getDefault()).format(currentTrack.trackTime)
 
                     if (albumTemp.isEmpty()){
-                        binding.albumValue.visibility = View.GONE
-                        binding.albumTitle.visibility = View.GONE
+                        binding.albumValue.isVisible = false
+                        binding.albumTitle.isVisible = false
                     }
                     else {
-                        binding.albumValue.visibility = View.VISIBLE
-                        binding.albumTitle.visibility = View.VISIBLE
-                        binding.albumValue.text = albumTemp
+                        binding.albumValue.isVisible = true
+                        binding.albumTitle.isVisible = true
                     }
                     binding.timer.text = "00:00"
                     binding.yearValue.text = currentTrack.releaseDate.take(4)

@@ -19,6 +19,7 @@ import android.widget.LinearLayout
 import android.widget.ProgressBar
 import android.widget.TextView
 import androidx.appcompat.widget.Toolbar
+import androidx.core.view.isVisible
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.RecyclerView
 import com.example.playlistmaker.player.ui.Player
@@ -48,6 +49,8 @@ class SearchActivity : AppCompatActivity() {
 
     private lateinit var progressBar : ProgressBar
 
+    private val historyTracks = ArrayList<Track>()
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -73,7 +76,7 @@ class SearchActivity : AppCompatActivity() {
         clearHistoryBttn = findViewById(R.id.clear_history_button)
         historyLayout = findViewById(R.id.history_layout)
 
-        historyAdapter = SearchAdapter(viewModel.getHistory())
+        historyAdapter = SearchAdapter(historyTracks)
         rvHistoryList.adapter = historyAdapter
 
         val playerIntent = Intent(this, Player::class.java)
@@ -81,8 +84,8 @@ class SearchActivity : AppCompatActivity() {
         searchAdapter.setOnClickListener(object : SearchAdapter.OnClickListener {
             override fun onClick(track: Track) {
                 viewModel.toHistory(track)
-                historyLayout.visibility = View.GONE
-                rvSearchTrack.visibility = View.VISIBLE
+                historyLayout.isVisible = false
+                rvSearchTrack.isVisible = true
                 if (clickDebounce()) {
                     startActivity(playerIntent)
                 }
@@ -105,8 +108,9 @@ class SearchActivity : AppCompatActivity() {
         clearHistoryBttn.setOnClickListener(){
             viewModel.clearHistory()
             historyAdapter.notifyDataSetChanged()
-            historyLayout.visibility = View.GONE
-            rvSearchTrack.visibility = View.VISIBLE
+            historyLayout.isVisible = false
+            trackList.clear()
+            rvSearchTrack.isVisible = true
 
         }
 
@@ -118,7 +122,9 @@ class SearchActivity : AppCompatActivity() {
             inputEditText.setText("")
             val inputMethodManager = getSystemService(Context.INPUT_METHOD_SERVICE) as? InputMethodManager
             inputMethodManager?.hideSoftInputFromWindow(inputEditText.windowToken, 0)
-            showMessage(0)
+            placeholderMessage.isVisible = false
+            rvSearchTrack.isVisible = false
+            updateButton.isVisible = false
         }
 
         val myTextWatcher = object : TextWatcher {
@@ -171,7 +177,7 @@ class SearchActivity : AppCompatActivity() {
         viewModel.searchStateLiveData.observe(this) { searchState ->
             when (searchState) {
                 is SearchState.Success -> {
-                    progressBar.visibility = View.GONE
+                    progressBar.isVisible = false
                     trackList.clear()
                     showMessage(0)
                     trackList.addAll(searchState.tracks)
@@ -179,16 +185,20 @@ class SearchActivity : AppCompatActivity() {
 
                 }
                 is SearchState.Nothing -> {
-                    progressBar.visibility = View.GONE
+                    progressBar.isVisible = false
                     trackList.clear()
                     showMessage(1)
 
                 }
                 is SearchState.Error -> {
-                    progressBar.visibility = View.GONE
+                    progressBar.isVisible = false
                     Log.d("TAG", "onFailure: ${searchState.t}")
                     showMessage(2)
 
+                }
+                is SearchState.History -> {
+                    historyTracks.clear()
+                    historyTracks.addAll(searchState.tracks)
                 }
             }
         }
@@ -197,20 +207,20 @@ class SearchActivity : AppCompatActivity() {
     }
 
     private fun showHistory(show : Boolean){
-         if ((show) && (viewModel.getHistory().isNotEmpty())) {
-            historyLayout.visibility = View.VISIBLE
-            rvSearchTrack.visibility = View.GONE
+         if ((show) && (historyTracks.isNotEmpty())) {
+            historyLayout.isVisible = true
+            rvSearchTrack.isVisible = false
             historyAdapter.notifyDataSetChanged()
         }
         else {
-            historyLayout.visibility = View.GONE
-            rvSearchTrack.visibility = View.VISIBLE
+            historyLayout.isVisible = false
+            rvSearchTrack.isVisible = true
         }
     }
 
     private fun searchRequest() {
         if (inputEditText.text.isNotEmpty()) {
-            progressBar.visibility = View.VISIBLE
+            progressBar.isVisible = true
 
             viewModel.search(inputEditText.text.toString())
 
@@ -241,13 +251,13 @@ class SearchActivity : AppCompatActivity() {
     private fun showMessage(code: Int) {
 
             if (code == 0) {
-                placeholderMessage.visibility = View.GONE
-                rvSearchTrack.visibility = View.VISIBLE
-                updateButton.visibility = View.GONE
+                placeholderMessage.isVisible = false
+                rvSearchTrack.isVisible = true
+                updateButton.isVisible = false
             }
             else {
-                placeholderMessage.visibility = View.VISIBLE
-                rvSearchTrack.visibility = View.GONE
+                placeholderMessage.isVisible = true
+                rvSearchTrack.isVisible = false
                 trackList.clear()
                 searchAdapter.notifyDataSetChanged()
                 when (code) {
@@ -256,14 +266,14 @@ class SearchActivity : AppCompatActivity() {
                         placeholderMessage.setTextAppearance(R.style.MyErrorStyle1)
                         placeholderMessage.setCompoundDrawablesRelativeWithIntrinsicBounds(0,
                             R.drawable.nothing_found,0,0)
-                        updateButton.visibility = View.GONE
+                        updateButton.isVisible = false
                     }
                     2 -> {
                         placeholderMessage.text = getString(R.string.something_went_wrong)
                         placeholderMessage.setTextAppearance(R.style.MyErrorStyle2)
                         placeholderMessage.setCompoundDrawablesRelativeWithIntrinsicBounds(0,
                             R.drawable.no_connection,0,0)
-                        updateButton.visibility = View.VISIBLE
+                        updateButton.isVisible = true
                     }
                 }
             }

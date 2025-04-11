@@ -16,16 +16,22 @@ class SearchViewModel : ViewModel() {
     private var searchStateLiveDataMutable = MutableLiveData<SearchState>()
     val searchStateLiveData : LiveData<SearchState> = searchStateLiveDataMutable
 
-    fun getHistory() : List<Track> {
+    init {
+        searchStateLiveDataMutable.postValue(SearchState.History(getHistory()))
+    }
+
+    private fun getHistory() : List<Track> {
         return searchHistory.getHistory()
     }
 
     fun toHistory(track : Track) {
         searchHistory.addTrackToHistory(track)
+        searchStateLiveDataMutable.postValue(SearchState.History(getHistory()))
     }
 
     fun clearHistory(){
         searchHistory.clearHistory()
+        searchStateLiveDataMutable.postValue(SearchState.History(getHistory()))
     }
 
     fun search(inputStr : String){
