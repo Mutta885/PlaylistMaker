@@ -1,4 +1,4 @@
-package com.example.playlistmaker
+package com.example.playlistmaker.presentation.settings
 
 import android.content.Intent
 import android.net.Uri
@@ -6,9 +6,14 @@ import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.widget.FrameLayout
 import androidx.appcompat.widget.Toolbar
+import com.example.playlistmaker.Creator
+import com.example.playlistmaker.R
 import com.google.android.material.switchmaterial.SwitchMaterial
 
 class SettingsActivity : AppCompatActivity() {
+
+    private val themeInteractor = Creator.provideThemeInteractor()
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_settings)
@@ -22,18 +27,10 @@ class SettingsActivity : AppCompatActivity() {
             finish()
         }
 
-        val sharedPrefs = getSharedPreferences(PLAYLIST_MAKER_PREFERENCES, MODE_PRIVATE)
         val themeSwitcher = findViewById<SwitchMaterial>(R.id.themeSwitcher)
-        val darkTheme  = false
-        themeSwitcher.isChecked = sharedPrefs.getBoolean(DARK_THEME_KEY, darkTheme)
 
-        themeSwitcher.setOnCheckedChangeListener { switcher, checked ->
-            (applicationContext as App).switchTheme(checked)
-
-            sharedPrefs.edit()
-                .putBoolean(DARK_THEME_KEY, checked)
-                .apply()
-        }
+        themeSwitcher.isChecked =  themeInteractor.getTheme()
+        themeSwitcher.setOnCheckedChangeListener { switcher, checked -> themeInteractor.setTheme(checked)}
 
         shareBtn.setOnClickListener {
             val message = getString(R.string.course_link)
