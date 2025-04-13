@@ -20,11 +20,11 @@ import android.widget.ProgressBar
 import android.widget.TextView
 import androidx.appcompat.widget.Toolbar
 import androidx.core.view.isVisible
-import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.RecyclerView
 import com.example.playlistmaker.player.ui.Player
 import com.example.playlistmaker.R
 import com.example.playlistmaker.search.domain.models.Track
+import org.koin.androidx.viewmodel.ext.android.viewModel
 
 class SearchActivity : AppCompatActivity() {
 
@@ -43,7 +43,7 @@ class SearchActivity : AppCompatActivity() {
     private lateinit var clearHistoryBttn: Button
     private lateinit var historyLayout: LinearLayout
 
-    private lateinit var viewModel : SearchViewModel
+    private val viewModel by viewModel<SearchViewModel>()
 
     private lateinit var historyAdapter : SearchAdapter
 
@@ -54,8 +54,6 @@ class SearchActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
-        viewModel = ViewModelProvider(this)[SearchViewModel::class.java]
 
         setContentView(R.layout.activity_search)
 

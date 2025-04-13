@@ -6,14 +6,12 @@ import android.os.Looper
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import com.example.playlistmaker.creator.Creator
 import com.example.playlistmaker.player.domain.api.PlayerInteractor
 import java.util.Locale
 
 
-class PlayerViewModel : ViewModel() {
+class PlayerViewModel(private val playerInteractor : PlayerInteractor) : ViewModel() {
 
-    private val playerInteractor : PlayerInteractor = Creator.providePlayerInteractor()
     private var mainThreadHandler : Handler? = null
 
     private var playerStateLiveDataMutable = MutableLiveData<PlayerState>()
