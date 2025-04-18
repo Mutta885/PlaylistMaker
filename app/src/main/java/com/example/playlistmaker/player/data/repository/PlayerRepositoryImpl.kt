@@ -1,21 +1,19 @@
 package com.example.playlistmaker.player.data.repository
 
 import android.media.MediaPlayer
-import com.example.playlistmaker.creator.Creator
 import com.example.playlistmaker.player.domain.api.PlayerRepository
+import com.example.playlistmaker.search.domain.api.HistoryInteractor
 import com.example.playlistmaker.search.domain.models.Track
 
 
 
-class PlayerRepositoryImpl(private val mediaPlayer : MediaPlayer) : PlayerRepository {
+class PlayerRepositoryImpl(private val mediaPlayer : MediaPlayer, private var historyInteractor : HistoryInteractor) : PlayerRepository {
 
     private enum class PlayButtonState {PLAY, PAUSE}
 
     private var playButtonState = PlayButtonState.PLAY
 
     private var playerState = STATE_DEFAULT
-
-    private var historyInteractor = Creator.provideHistoryInteractor()
 
     private var currentTrack = historyInteractor.getHistory()[0]
 
