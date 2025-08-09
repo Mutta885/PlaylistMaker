@@ -8,4 +8,6 @@
     <color name="dark">#1A1B22</color>
     <color name="edit_light_grey">#E6E8EB</color>
 
+    <color name="bottom_menu_active">#3772E7</color>
+    <color name="bottom_menu_default">#1A1B22</color>
 </resources>

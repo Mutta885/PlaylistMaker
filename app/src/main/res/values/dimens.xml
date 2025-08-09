@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <dimen name="value_0_5">0.5dp</dimen>
     <dimen name="value_0">0dp</dimen>
     <dimen name="value_1">1dp</dimen>
     <dimen name="value_2">2dp</dimen>
@@ -40,6 +41,8 @@
     <dimen name="error_size">19sp</dimen>
     <dimen name="update_size">14sp</dimen>
     <dimen name="info_size">13sp</dimen>
+    <dimen name="menu_size">12sp</dimen>
+
 
     <dimen name="album_radius">2dp</dimen>
     <dimen name="album_side">45dp</dimen>
