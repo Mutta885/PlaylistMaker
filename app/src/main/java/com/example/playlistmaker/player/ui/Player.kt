@@ -26,7 +26,7 @@ class Player : AppCompatActivity() {
 
         viewModel.playerStateLiveData.observe(this) { playerState ->
             when (playerState) {
-                is PlayerState.Loading -> {
+                is PlayerState.Prepared -> {
                     val currentTrack = playerState.track
                     val albumTemp = currentTrack.collectionName
                     binding.trackTimeValue.text = SimpleDateFormat("mm:ss", Locale.getDefault()).format(currentTrack.trackTime)
@@ -45,6 +45,7 @@ class Player : AppCompatActivity() {
                     binding.countryValue.text = currentTrack.country
                     binding.trackName.text = currentTrack.trackName
                     binding.artistName.text = currentTrack.artistName
+                    binding.albumValue.text = currentTrack.collectionName
                     val bigCover = currentTrack.artworkUrl100.replaceAfterLast('/',"512x512bb.jpg")
 
                     Glide.with(applicationContext)
@@ -55,25 +56,21 @@ class Player : AppCompatActivity() {
                         .dontAnimate()
                         .into(binding.cover)
 
+                    binding.playButton.setImageResource(R.drawable.play)
                 }
 
                 is PlayerState.Paused -> {
-                    binding.timer.text = playerState.timer
+                    binding.timer.text = playerState.progress
                     binding.playButton.setImageResource(R.drawable.play)
                 }
                 is PlayerState.Playing -> {
-                    binding.timer.text = playerState.timer
+                    binding.timer.text = playerState.progress
                     binding.playButton.setImageResource(R.drawable.pause)
                 }
-                is PlayerState.Prepared -> {
-                    binding.timer.text = playerState.timer
-                    binding.playButton.setImageResource(R.drawable.play)
+                else -> {}
 
-                }
             }
         }
-
-
 
 
         binding.menuButton.setOnClickListener(){
@@ -81,7 +78,7 @@ class Player : AppCompatActivity() {
         }
 
         binding.playButton.setOnClickListener(){
-            viewModel.playbackControl()
+            viewModel.onPlayButtonClicked()
         }
 
 
