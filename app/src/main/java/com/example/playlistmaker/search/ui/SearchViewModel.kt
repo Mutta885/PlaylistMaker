@@ -3,9 +3,11 @@ package com.example.playlistmaker.search.ui
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.example.playlistmaker.search.domain.api.HistoryInteractor
 import com.example.playlistmaker.search.domain.api.TracksInteractor
 import com.example.playlistmaker.search.domain.models.Track
+import kotlinx.coroutines.launch
 
 
 class SearchViewModel(private val searchHistory : HistoryInteractor,
@@ -32,22 +34,36 @@ class SearchViewModel(private val searchHistory : HistoryInteractor,
         searchStateLiveDataMutable.postValue(SearchState.History(getHistory()))
     }
 
+
     fun search(inputStr : String){
 
-        tracksInteractor.searchTracks(inputStr,
-            object : TracksInteractor.TracksConsumer {
-                override fun consume(foundTracks: List<Track>) {
-                        if (foundTracks.isNotEmpty()) {
-                            searchStateLiveDataMutable.postValue(SearchState.Success(foundTracks))
-                        } else {
-                            searchStateLiveDataMutable.postValue((SearchState.Nothing))
-                        }
+        viewModelScope.launch {
+            tracksInteractor
+                .searchTracks(inputStr)
+                .collect { pair ->
+                    processResult(pair.first, pair.second)
                 }
-                override fun onFailure(t: Throwable) {
-                        searchStateLiveDataMutable.postValue(SearchState.Error(t))
-                }
-            })
+        }
 
     }
+
+    private fun processResult(foundTracks: List<Track>?, errorMessage: String?) {
+
+        when {
+
+            foundTracks.isNullOrEmpty() -> {
+                searchStateLiveDataMutable.postValue((SearchState.Nothing))
+            }
+
+            errorMessage != null -> {
+                searchStateLiveDataMutable.postValue(SearchState.Error(errorMessage))
+            }
+
+            else -> {
+                searchStateLiveDataMutable.postValue(SearchState.Success(foundTracks))
+            }
+        }
+    }
+
 
 }

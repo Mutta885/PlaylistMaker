@@ -6,83 +6,70 @@ import android.os.Looper
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.example.playlistmaker.player.domain.api.PlayerInteractor
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import java.util.Locale
 
 
 class PlayerViewModel(private val playerInteractor : PlayerInteractor) : ViewModel() {
 
-    private var mainThreadHandler : Handler? = null
-
     private var playerStateLiveDataMutable = MutableLiveData<PlayerState>()
     val playerStateLiveData : LiveData<PlayerState> = playerStateLiveDataMutable
 
-    init {
-        mainThreadHandler = Handler(Looper.getMainLooper())
-        playerStateLiveDataMutable.postValue(PlayerState.Loading(playerInteractor.getCrrntTrack()))
+    private var timerJob: Job? = null
 
+    init {
+         playerStateLiveDataMutable.postValue(PlayerState.Prepared(playerInteractor.getCrrntTrack()))
     }
 
 
     fun preparePlayer() {
-
- 
-
         playerInteractor.preparePlayer {
-            mainThreadHandler?.removeCallbacksAndMessages(null)
-            playerStateLiveDataMutable.postValue(PlayerState.Prepared("00:00"))
+            playerStateLiveDataMutable.postValue(PlayerState.Paused("00:00"))
         }
 
-        playbackControl()
-
     }
 
-    fun playbackControl(){
-        playerInteractor.playbackControl()
-        timerControl()
-
-    }
-
-    private fun timerControl(){
-        when(playerInteractor.getPlayerState()) {
-            STATE_PLAYING -> {
-                mainThreadHandler?.post(createUpdateTimerTask())
+    fun onPlayButtonClicked(){
+        when(playerStateLiveDataMutable.value) {
+            is PlayerState.Playing -> {
+                playerInteractor.pausePlayer()
+                timerJob?.cancel()
+                playerStateLiveDataMutable.postValue (PlayerState.Paused(
+                    SimpleDateFormat(
+                        "mm:ss",
+                        Locale.getDefault()
+                    ).format(playerInteractor.getMediaPlayerTimer())
+                )
+                )
+            }
+            is PlayerState.Paused, is PlayerState.Prepared -> {
+                playerInteractor.startPlayer()
+                startTimer()
 
             }
-            STATE_PAUSED -> {
-                mainThreadHandler?.removeCallbacks(createUpdateTimerTask())
-
-            }
+            else -> {}
 
         }
     }
 
-    private fun createUpdateTimerTask(): Runnable {
-        return object : Runnable {
-            override fun run() {
-
-                when (playerInteractor.getPlayBttnState()) {
-                    true -> playerStateLiveDataMutable.postValue(
-                        PlayerState.Paused(
-                            SimpleDateFormat(
-                                "mm:ss",
-                                Locale.getDefault()
-                            ).format(playerInteractor.getMediaPlayerTimer())
-                        )
-                    )
-                    else -> playerStateLiveDataMutable.postValue(
-                        PlayerState.Playing(
-                            SimpleDateFormat(
-                                "mm:ss",
-                                Locale.getDefault()
-                            ).format(playerInteractor.getMediaPlayerTimer())
-                        )
-                    )
-                }
-
-                mainThreadHandler?.postDelayed(this, DELAY)
-
+    private fun startTimer() {
+        timerJob?.cancel()
+        timerJob = viewModelScope.launch {
+            while (playerInteractor.getPlayerState() == STATE_PLAYING) {
+                delay(DELAY)
+                playerStateLiveDataMutable.postValue(PlayerState.Playing(
+                    SimpleDateFormat(
+                        "mm:ss",
+                        Locale.getDefault()
+                    ).format(playerInteractor.getMediaPlayerTimer())
+                )
+                )
             }
+            playerStateLiveDataMutable.postValue(PlayerState.Paused("00:00"))
         }
     }
 
@@ -91,8 +78,9 @@ class PlayerViewModel(private val playerInteractor : PlayerInteractor) : ViewMod
     }
 
     fun onDestroy() {
-        mainThreadHandler?.removeCallbacksAndMessages(null)
+        //mainThreadHandler?.removeCallbacksAndMessages(null)
         playerInteractor.destroyPlayer()
+        playerStateLiveDataMutable.value = PlayerState.Default()
 
     }
 
@@ -102,7 +90,7 @@ class PlayerViewModel(private val playerInteractor : PlayerInteractor) : ViewMod
         private const val STATE_PREPARED = 1
         private const val STATE_PLAYING = 2
         private const val STATE_PAUSED = 3
-        private const val DELAY = 500L
+        private const val DELAY = 300L
     }
 
 

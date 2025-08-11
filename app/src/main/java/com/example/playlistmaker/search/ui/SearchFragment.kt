@@ -15,10 +15,14 @@ import android.view.inputmethod.EditorInfo
 import android.view.inputmethod.InputMethodManager
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.lifecycleScope
 import com.example.playlistmaker.R
 import com.example.playlistmaker.databinding.FragmentSearchBinding
 import com.example.playlistmaker.player.ui.Player
 import com.example.playlistmaker.search.domain.models.Track
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import org.koin.androidx.viewmodel.ext.android.viewModel
 
 class SearchFragment : Fragment() {
@@ -33,6 +37,9 @@ class SearchFragment : Fragment() {
 
     private var _binding: FragmentSearchBinding? = null
     private val binding get() = _binding!!
+
+    private var latestSearchText: String? = null
+    private var searchJob: Job? = null
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         _binding = FragmentSearchBinding.inflate(inflater, container, false)
@@ -100,7 +107,8 @@ class SearchFragment : Fragment() {
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
 
                 binding.clearBtn.visibility = clearButtonVisibility(s)
-                searchDebounce()
+                searchDebounce(s.toString())
+                //latestSearchText = s.toString()
             }
 
             override fun afterTextChanged(s: Editable?) {
@@ -157,7 +165,7 @@ class SearchFragment : Fragment() {
                 }
                 is SearchState.Error -> {
                     binding.progressBar.isVisible = false
-                    Log.d("TAG", "onFailure: ${searchState.t}")
+                    Log.d("TAG", "onFailure: ${searchState.error}")
                     showMessage(2)
 
                 }
@@ -165,6 +173,7 @@ class SearchFragment : Fragment() {
                     historyTracks.clear()
                     historyTracks.addAll(searchState.tracks)
                 }
+                else -> {}
             }
         }
 
@@ -201,22 +210,35 @@ class SearchFragment : Fragment() {
 
     private var isClickAllowed = true
 
-    private val handler = Handler(Looper.getMainLooper())
 
     private fun clickDebounce() : Boolean {
         val current = isClickAllowed
         if (isClickAllowed) {
             isClickAllowed = false
-            handler.postDelayed({ isClickAllowed = true }, CLICK_DEBOUNCE_DELAY)
+            viewLifecycleOwner.lifecycleScope.launch {
+                delay(CLICK_DEBOUNCE_DELAY)
+                isClickAllowed = true
+            }
+
         }
         return current
     }
 
-    private val searchRunnable = Runnable { searchRequest() }
+    fun searchDebounce(changedText: String) {
 
-    private fun searchDebounce() {
-        handler.removeCallbacks(searchRunnable)
-        handler.postDelayed(searchRunnable, SEARCH_DEBOUNCE_DELAY)
+        if (latestSearchText == changedText) {
+            return
+        }
+
+        latestSearchText = changedText
+
+        searchJob?.cancel()
+        searchJob = lifecycleScope.launch {
+            delay(SEARCH_DEBOUNCE_DELAY)
+            searchRequest()//(changedText)
+        }
+
+
     }
 
     private fun showMessage(code: Int) {
