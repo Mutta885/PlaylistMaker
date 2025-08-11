@@ -7,7 +7,7 @@ import com.example.playlistmaker.search.domain.models.Track
 
 
 
-class PlayerRepositoryImpl(private val mediaPlayer : MediaPlayer, private var historyInteractor : HistoryInteractor) : PlayerRepository {
+class PlayerRepositoryImpl(private val mediaPlayer : MediaPlayer) : PlayerRepository {
 
     private enum class PlayButtonState {PLAY, PAUSE}
 
@@ -15,13 +15,6 @@ class PlayerRepositoryImpl(private val mediaPlayer : MediaPlayer, private var hi
 
     private var playerState = STATE_DEFAULT
 
-    private var currentTrack = historyInteractor.getHistory()[0]
-
-    private var url : String = currentTrack.previewUrl
-
-    override fun getCrrntTrack(): Track {
-        return currentTrack
-    }
 
     override fun getPlayBttnState():Boolean{
         if (playButtonState == PlayButtonState.PLAY) return true else return false
@@ -39,7 +32,7 @@ class PlayerRepositoryImpl(private val mediaPlayer : MediaPlayer, private var hi
         mediaPlayer.release()
     }
 
-    override fun preparePlayer(onCompleted: () -> Unit) {
+    override fun preparePlayer(url : String, onCompleted: () -> Unit) {
         mediaPlayer.setDataSource(url)
         mediaPlayer.prepareAsync()
         mediaPlayer.setOnPreparedListener {

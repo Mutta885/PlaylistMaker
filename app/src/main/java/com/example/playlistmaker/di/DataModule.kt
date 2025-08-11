@@ -6,6 +6,8 @@ import org.koin.android.ext.koin.androidContext
 import android.content.Context
 import android.content.res.Configuration
 import android.media.MediaPlayer
+import androidx.room.Room
+import com.example.playlistmaker.library.data.db.AppDatabase
 import com.example.playlistmaker.search.data.network.NetworkClient
 import com.example.playlistmaker.search.data.network.RetrofitNetworkClient
 import org.koin.dsl.module
@@ -40,5 +42,10 @@ val dataModule = module {
     }
 
     factory { MediaPlayer()}
+
+    single {
+        Room.databaseBuilder(androidContext(), AppDatabase::class.java, "database.db")
+            .build()
+    }
 
 }
