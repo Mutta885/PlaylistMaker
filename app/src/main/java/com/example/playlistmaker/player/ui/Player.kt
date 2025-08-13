@@ -8,6 +8,9 @@ import com.bumptech.glide.Glide
 import com.bumptech.glide.load.resource.bitmap.RoundedCorners
 import com.example.playlistmaker.R
 import com.example.playlistmaker.databinding.ActivityPlayerBinding
+import com.example.playlistmaker.search.domain.models.Track
+import com.google.gson.Gson
+import com.google.gson.reflect.TypeToken
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import java.util.Locale
 
@@ -15,6 +18,7 @@ class Player : AppCompatActivity() {
 
     private val viewModel by viewModel<PlayerViewModel>()
     private lateinit var binding: ActivityPlayerBinding
+    private lateinit var currentTrack : Track
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -22,13 +26,16 @@ class Player : AppCompatActivity() {
         binding = ActivityPlayerBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        viewModel.preparePlayer()
+        currentTrack = Gson().fromJson(intent.extras?.getString("TRACK"), Track::class.java)
+
+        viewModel.preparePlayer(currentTrack)
 
         viewModel.playerStateLiveData.observe(this) { playerState ->
             when (playerState) {
                 is PlayerState.Prepared -> {
-                    val currentTrack = playerState.track
+                    //val currentTrack = playerState.track
                     val albumTemp = currentTrack.collectionName
+                    viewModel.isFavoriteState(currentTrack.trackId)
                     binding.trackTimeValue.text = SimpleDateFormat("mm:ss", Locale.getDefault()).format(currentTrack.trackTime)
 
                     if (albumTemp.isEmpty()){
@@ -70,6 +77,18 @@ class Player : AppCompatActivity() {
                 else -> {}
 
             }
+        }
+
+        viewModel.isFavoriteLiveData.observe(this) { isFavorite ->
+            if (isFavorite) {
+                binding.toFavoriteButton.setImageResource(R.drawable.to_favorite_true)
+            } else {
+                binding.toFavoriteButton.setImageResource(R.drawable.to_favorite)
+            }
+        }
+
+        binding.toFavoriteButton.setOnClickListener(){
+            viewModel.swithFavorite(currentTrack)
         }
 
 

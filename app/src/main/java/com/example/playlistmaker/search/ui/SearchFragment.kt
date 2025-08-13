@@ -3,8 +3,6 @@ package com.example.playlistmaker.search.ui
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
-import android.os.Handler
-import android.os.Looper
 import android.text.Editable
 import android.text.TextWatcher
 import android.util.Log
@@ -20,6 +18,7 @@ import com.example.playlistmaker.R
 import com.example.playlistmaker.databinding.FragmentSearchBinding
 import com.example.playlistmaker.player.ui.Player
 import com.example.playlistmaker.search.domain.models.Track
+import com.google.gson.Gson
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -62,6 +61,7 @@ class SearchFragment : Fragment() {
                 binding.historyLayout.isVisible = false
                 binding.trackList.isVisible = true
                 if (clickDebounce()) {
+                    playerIntent.putExtra("TRACK", Gson().toJson(track))
                     startActivity(playerIntent)
                 }
             }
@@ -73,6 +73,7 @@ class SearchFragment : Fragment() {
                 historyAdapter.notifyDataSetChanged()
 
                 if (clickDebounce()) {
+                    playerIntent.putExtra("TRACK", Gson().toJson(track))
                     startActivity(playerIntent)
                 }
 

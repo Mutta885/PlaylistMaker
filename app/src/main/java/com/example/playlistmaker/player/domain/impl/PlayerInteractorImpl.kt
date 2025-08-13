@@ -7,8 +7,8 @@ import com.example.playlistmaker.search.domain.models.Track
 
 class PlayerInteractorImpl(private val repository : PlayerRepository) : PlayerInteractor {
 
-    override fun preparePlayer(onCompleted:()->Unit){
-        return repository.preparePlayer(onCompleted)
+    override fun preparePlayer(url : String, onCompleted:()->Unit){
+        return repository.preparePlayer(url, onCompleted)
     }
     override fun startPlayer(){
         return repository.startPlayer()
@@ -20,9 +20,6 @@ class PlayerInteractorImpl(private val repository : PlayerRepository) : PlayerIn
         return repository.playbackControl()
     }
 
-    override fun getCrrntTrack(): Track {
-        return repository.getCrrntTrack()
-    }
 
     override fun getPlayBttnState(): Boolean {
         return repository.getPlayBttnState()
