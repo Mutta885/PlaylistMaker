@@ -2,23 +2,34 @@ package com.example.playlistmaker.player.ui
 
 import android.icu.text.SimpleDateFormat
 import android.os.Bundle
+import android.view.View
+import android.widget.LinearLayout
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.isVisible
+import androidx.navigation.Navigation.findNavController
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.resource.bitmap.RoundedCorners
 import com.example.playlistmaker.R
 import com.example.playlistmaker.databinding.ActivityPlayerBinding
+import com.example.playlistmaker.library.ui.PlaylistAdapter
 import com.example.playlistmaker.search.domain.models.Track
+import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import java.util.Locale
+import androidx.navigation.fragment.findNavController
+import com.example.playlistmaker.library.domain.models.Playlist
+import com.example.playlistmaker.library.ui.PlaylistsState
 
 class Player : AppCompatActivity() {
 
     private val viewModel by viewModel<PlayerViewModel>()
     private lateinit var binding: ActivityPlayerBinding
     private lateinit var currentTrack : Track
+    private lateinit var adapter: PlaylistAdapter
+    private var bottomSheetBehavior: BottomSheetBehavior<LinearLayout>? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -28,7 +39,23 @@ class Player : AppCompatActivity() {
 
         currentTrack = Gson().fromJson(intent.extras?.getString("TRACK"), Track::class.java)
 
+        adapter = PlaylistAdapter(
+            viewType = PlaylistAdapter.FROM_PLAYER,
+            onItemClick = { playlist ->
+                viewModel.addTrackToPlaylist(playlist)
+            })
+        binding.recyclerView.adapter = adapter
+
+        setBottomSheetBehavior()
+
         viewModel.preparePlayer(currentTrack)
+
+
+
+        viewModel.getPlaylists()
+
+
+
 
         viewModel.playerStateLiveData.observe(this) { playerState ->
             when (playerState) {
@@ -79,6 +106,19 @@ class Player : AppCompatActivity() {
             }
         }
 
+
+
+
+        viewModel.PlaylistsLiveData.observe(this) { state ->
+                managePlaylists(state)
+            }
+        viewModel.TrackAddedLiveData.observe(this) { message ->
+                showMessage(message)
+                bottomSheetBehavior?.state = BottomSheetBehavior.STATE_HIDDEN
+            }
+
+
+
         viewModel.isFavoriteLiveData.observe(this) { isFavorite ->
             if (isFavorite) {
                 binding.toFavoriteButton.setImageResource(R.drawable.to_favorite_true)
@@ -100,8 +140,84 @@ class Player : AppCompatActivity() {
             viewModel.onPlayButtonClicked()
         }
 
+        binding.toPlayListButton.setOnClickListener {
+            bottomSheetBehavior?.state = BottomSheetBehavior.STATE_HALF_EXPANDED
+        }
+        binding.btCreatePlaylist.setOnClickListener {
+            findNavController(this, R.id.maker).navigate(R.id.action_playerFragment_to_makerFragment)
+        }
 
     }
+
+
+
+
+
+    private fun managePlaylists(state: PlaylistsState) {
+        when (state) {
+            PlaylistsState.Empty -> showPlaceholder()
+            is PlaylistsState.Content -> showPlaylists(state.playlists)
+        }
+    }
+
+
+    private fun showPlaceholder() {
+        binding.apply {
+            recyclerView.isVisible = false
+            progressbar.isVisible = false
+            layoutPlaceholder.isVisible = true
+        }
+    }
+
+    private fun showPlaylists(playlists: List<Playlist>) {
+        binding.apply {
+            recyclerView.isVisible = true
+            progressbar.isVisible = false
+            layoutPlaceholder.isVisible = false
+        }
+        adapter?.clearList()
+        adapter?.submitList(playlists as ArrayList)
+        adapter?.notifyDataSetChanged()
+    }
+
+    private fun showMessage(message: String) {
+
+        Toast.makeText(this,message, Toast.LENGTH_SHORT).show()
+
+    }
+
+    private fun setBottomSheetBehavior() {
+        bottomSheetBehavior = BottomSheetBehavior.from(binding.layoutToPlaylist).apply {
+            state = BottomSheetBehavior.STATE_HIDDEN
+        }
+
+        val overlay = binding.overlay
+
+        bottomSheetBehavior?.addBottomSheetCallback(object :
+            BottomSheetBehavior.BottomSheetCallback() {
+
+            override fun onStateChanged(bottomSheet: View, newState: Int) {
+
+                when (newState) {
+                    BottomSheetBehavior.STATE_HIDDEN -> {
+                        overlay.isVisible = false
+                    }
+
+                    else -> {
+                        overlay.isVisible = true
+                    }
+                }
+            }
+
+            override fun onSlide(bottomSheet: View, slideOffset: Float) {}
+        })
+
+    }
+
+
+
+
+
 
     override fun onPause() {
         super.onPause()
