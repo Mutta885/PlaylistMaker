@@ -15,6 +15,15 @@
         android:text="@string/new_playlist"
         android:visibility="visible" />
 
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/recycler_view"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="@dimen/value_8"
+        tools:listitem="@layout/playlist"
+        app:layoutManager="androidx.recyclerview.widget.GridLayoutManager"
+        app:spanCount="2"/>
+
     <ImageView
         android:id="@+id/placeholder_image"
         android:layout_width="@dimen/value_120"

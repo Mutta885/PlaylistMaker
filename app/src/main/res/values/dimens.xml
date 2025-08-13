@@ -22,6 +22,7 @@
     <dimen name="value_30">30dp</dimen>
     <dimen name="value_32">32dp</dimen>
     <dimen name="value_36">36dp</dimen>
+    <dimen name="value_42">42dp</dimen>
     <dimen name="value_46">46dp</dimen>
     <dimen name="value_48">48dp</dimen>
     <dimen name="value_51">51dp</dimen>
@@ -42,6 +43,7 @@
     <dimen name="update_size">14sp</dimen>
     <dimen name="info_size">13sp</dimen>
     <dimen name="menu_size">12sp</dimen>
+    <dimen name="playlist_player_size">11sp</dimen>
 
 
     <dimen name="album_radius">2dp</dimen>
