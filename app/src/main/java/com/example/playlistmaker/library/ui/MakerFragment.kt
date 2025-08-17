@@ -44,7 +44,7 @@ class MakerFragment : Fragment() {
     private var newPlaylistTitle = ""
     private var newPlaylistDescription: String? = null
     private var newPlaylistCoverPath: String? = null
-    private var creatingWasStarted = false
+    private var isCreationStarted  = false
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,savedInstanceState: Bundle?): View {
         _binding = FragmentMakerBinding.inflate(inflater, container, false)
@@ -112,7 +112,7 @@ class MakerFragment : Fragment() {
         val pickMedia =
             registerForActivityResult(ActivityResultContracts.PickVisualMedia()) { uri ->
                 if (uri != null) {
-                    creatingWasStarted = true
+                    isCreationStarted  = true
 
                     saveImageToPrivateStorage(uri)
 
@@ -163,7 +163,7 @@ class MakerFragment : Fragment() {
 
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
                 val isEmpty = s.isNullOrEmpty()
-                creatingWasStarted = !isEmpty
+                isCreationStarted  = !isEmpty
 
                 val strokeColor = getStrokeColor(isEmpty)
                 val hintColor = getHintColorStateList(isEmpty)
@@ -227,7 +227,7 @@ class MakerFragment : Fragment() {
 
     private fun showExitConfirmationDialog() {
 
-        if (creatingWasStarted) {
+        if (isCreationStarted ) {
             MaterialAlertDialogBuilder(requireActivity())
                 .setTitle(getString(R.string.complete))
                 .setMessage(getString(R.string.warning))
@@ -241,7 +241,7 @@ class MakerFragment : Fragment() {
 
     private fun showToast(title: String) {
 
-        Toast.makeText(requireActivity(), "Плейлист $title успешно создан!", Toast.LENGTH_SHORT)
+        Toast.makeText(requireActivity(), getString(R.string.created_sucks_1 ) + " $title " + getString(R.string.created_sucks_2 ), Toast.LENGTH_SHORT)
             .show()
     }
 

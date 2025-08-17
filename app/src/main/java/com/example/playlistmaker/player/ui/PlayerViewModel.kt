@@ -164,10 +164,16 @@ class PlayerViewModel(private val playerInteractor : PlayerInteractor, private v
 
     fun onDestroy() {
         playerInteractor.destroyPlayer()
+        timerJob?.cancel()
         playerStateLiveDataMutable.value = PlayerState.Default()
 
     }
 
+    override fun onCleared() {
+        playerInteractor.destroyPlayer()
+        timerJob?.cancel()
+
+    }
 
     private companion object {                  //переделать с помощью enum класса
         private const val STATE_DEFAULT = 0

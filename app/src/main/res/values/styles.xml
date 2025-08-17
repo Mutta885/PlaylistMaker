@@ -64,8 +64,9 @@
     </style>
 
     <style name="MakerTexteditStyle" parent="Widget.MaterialComponents.TextInputLayout.OutlinedBox">
-        <item name="android:textColorHint">?attr/colorOnPrimary</item>
-        <item name="boxStrokeColor">@color/edittext_selector</item>
+        <item name="fontFamily">@font/ys_display_regular</item>
+        <item name="android:textSize">@dimen/small_size</item>
+        <item name="android:textFontWeight">400</item>
 
     </style>
 

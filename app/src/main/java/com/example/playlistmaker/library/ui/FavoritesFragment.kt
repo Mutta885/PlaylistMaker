@@ -11,6 +11,7 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.lifecycle.lifecycleScope
+import androidx.navigation.fragment.findNavController
 import com.example.playlistmaker.databinding.FragmentFavoritesBinding
 import com.example.playlistmaker.player.ui.Player
 import com.example.playlistmaker.search.domain.models.Track
@@ -32,6 +33,8 @@ class FavoritesFragment : Fragment() {
 
     private val viewModel by viewModel<FavoritesFragmentViewModel>()
 
+    private var isClickAllowed = true
+
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         _binding = FragmentFavoritesBinding.inflate(inflater, container, false)
         return binding.root
@@ -40,7 +43,7 @@ class FavoritesFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
+        isClickAllowed = true
 
         favoritesAdapter = SearchAdapter(favoritesTracks)
         binding.favoriteList.adapter = favoritesAdapter
@@ -54,14 +57,12 @@ class FavoritesFragment : Fragment() {
             }
         }
 
-        val playerIntent = Intent(requireContext(), Player::class.java)
 
         favoritesAdapter.setOnClickListener(object : SearchAdapter.OnClickListener {
             override fun onClick(track: Track) {
 
                 if (clickDebounce()) {
-                    playerIntent.putExtra("TRACK", Gson().toJson(track))
-                    startActivity(playerIntent)
+                    findNavController().navigate(LibraryFragmentDirections.actionLibraryFragmentToPlayer(Gson().toJson(track)))
                 }
             }
         })
@@ -100,7 +101,7 @@ class FavoritesFragment : Fragment() {
         binding.placeholderImage.isVisible = false
     }
 
-    private var isClickAllowed = true
+
     private fun clickDebounce() : Boolean {
         val current = isClickAllowed
         if (isClickAllowed) {

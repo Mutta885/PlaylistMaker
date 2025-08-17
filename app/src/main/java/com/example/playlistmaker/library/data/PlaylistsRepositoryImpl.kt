@@ -35,7 +35,6 @@ class PlaylistsRepositoryImpl(private val appDatabase: AppDatabase) : PlaylistsR
             playlistDao().insertNewPlaylist(playlistEntity)
             newPlaylist.trackList.forEach { track -> Log.d("Debug", " $track") }
 
-            trackDao().insertNewFavorite(track.toTrackEntity())
         }
     }
 }

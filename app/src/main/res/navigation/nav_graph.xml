@@ -12,10 +12,13 @@
         tools:layout="@layout/fragment_library">
         <action
             android:id="@+id/action_libraryFragment_to_player"
-            app:destination="@id/player" />
+            app:destination="@id/player"
+            app:popUpTo="@id/libraryFragment"
+            app:popUpToInclusive="false"/>
         <action
-            android:id="@+id/action_libraryFragment_to_newPlaylistFragment"
+            android:id="@+id/action_libraryFragment_to_makerFragment"
             app:destination="@id/maker" />
+
     </fragment>
     <fragment
         android:id="@+id/searchFragment"
@@ -24,16 +27,24 @@
         tools:layout="@layout/fragment_search" >
         <action
             android:id="@+id/action_searchFragment_to_player"
-            app:destination="@id/player" />
+            app:destination="@id/player"
+            app:popUpTo="@id/searchFragment"
+            app:popUpToInclusive="false"
+            />
     </fragment>
-    <activity
+    <fragment
         android:id="@+id/player"
         android:name="com.example.playlistmaker.player.ui.Player"
-        android:label="activity_player"
-        tools:layout="@layout/activity_player" />
+        android:label="fragment_player"
+        tools:layout="@layout/fragment_player" >
+        <argument
+            android:name="currentTrack"
+            app:argType="string"
+            app:nullable="false" />
         <action
             android:id="@+id/action_playerFragment_to_makerFragment"
             app:destination="@id/maker" />
+    </fragment>
     <fragment
         android:id="@+id/settingsFragment"
         android:name="com.example.playlistmaker.settings.ui.SettingsFragment"

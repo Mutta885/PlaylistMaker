@@ -29,7 +29,7 @@ class PlaylistsFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         binding.newPlaylistButton.setOnClickListener {
             findNavController().navigate(
-                R.id.action_libraryFragment_to_newPlaylistFragment
+                LibraryFragmentDirections.actionLibraryFragmentToMakerFragment()
             )
         }
 
@@ -55,18 +55,14 @@ class PlaylistsFragment : Fragment() {
     private fun showPlaceholder() {
         binding.apply {
             recyclerView.isVisible = false
-            //progressbar.isVisible = false
             placeholderImage.isVisible = true
             placeholderText.isVisible = true
-            //llPlaceholder.isVisible = true
         }
     }
 
     private fun showContent(playlists: List<Playlist>) {
         binding.apply {
             recyclerView.isVisible = true
-            //progressbar.isVisible = false
-            //llPlaceholder.isVisible = false
             placeholderImage.isVisible = false
             placeholderText.isVisible = false
         }

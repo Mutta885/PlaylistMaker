@@ -33,6 +33,7 @@ class PlayerRepositoryImpl(private val mediaPlayer : MediaPlayer) : PlayerReposi
     }
 
     override fun preparePlayer(url : String, onCompleted: () -> Unit) {
+        mediaPlayer.reset()
         mediaPlayer.setDataSource(url)
         mediaPlayer.prepareAsync()
         mediaPlayer.setOnPreparedListener {

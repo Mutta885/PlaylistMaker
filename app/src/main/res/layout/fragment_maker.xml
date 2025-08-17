@@ -45,6 +45,7 @@
         android:importantForAccessibility="no"
         android:scaleType="center"
         android:src="@drawable/addimg"
+        android:background="@drawable/stroke_iv"
         app:layout_constraintDimensionRatio="1:1"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -53,8 +54,8 @@
 
 
     <com.google.android.material.textfield.TextInputLayout
-
         android:id="@+id/field_playlist_title"
+        style="MakerTexteditStyle"
         android:layout_width="0dp"
         android:layout_height="@dimen/value_56"
         android:layout_marginTop="@dimen/value_32"
@@ -64,7 +65,7 @@
         app:boxStrokeWidth="1dp"
         app:boxStrokeWidthFocused="1dp"
         app:hintEnabled="true"
-        app:hintTextColor="?attr/colorOnPrimary"
+        app:hintTextColor="@color/edittext_selector"
         app:layout_constraintEnd_toStartOf="@id/right_guideline"
         app:layout_constraintStart_toEndOf="@id/left_guideline"
         app:layout_constraintTop_toBottomOf="@id/playlist_image">
@@ -91,7 +92,7 @@
         app:boxStrokeWidth="1dp"
         app:boxStrokeWidthFocused="1dp"
         app:hintEnabled="true"
-        app:hintTextColor="?attr/colorOnPrimary"
+        app:hintTextColor="@color/edittext_selector"
         app:layout_constraintEnd_toStartOf="@id/right_guideline"
         app:layout_constraintStart_toEndOf="@id/left_guideline"
         app:layout_constraintTop_toBottomOf="@id/field_playlist_title">
