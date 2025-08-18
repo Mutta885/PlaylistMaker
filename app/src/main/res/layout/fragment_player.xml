@@ -1,7 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+
+<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     style="@style/OtherActivityStyle"
@@ -266,8 +275,94 @@
         app:layout_constraintBottom_toTopOf="@id/bottom_guideline"/>
 
 
+    </androidx.constraintlayout.widget.ConstraintLayout>
+    </ScrollView>
+
+
+    <View
+        android:id="@+id/overlay"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="#99000000"
+        android:visibility="gone" />
+
+    <LinearLayout
+        android:id="@+id/layout_to_playlist"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@drawable/round_bottomsheet"
+        android:orientation="vertical"
+        app:behavior_hideable="true"
+        app:layout_behavior="com.google.android.material.bottomsheet.BottomSheetBehavior">
+
+        <TextView
+            style="@style/AddToPlaylistStyle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/value_42"
+            android:gravity="center"
+            android:text="@string/to_playlist" />
+
+        <Button
+            android:id="@+id/bt_create_playlist"
+            style="@style/PlaceholderButtonStyle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/value_16"
+            android:text="@string/new_playlist"
+            android:visibility="visible" />
+
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/recycler_view"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="@dimen/value_8"
+            app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+            tools:itemCount="4"
+            tools:listitem="@layout/playlist_player" />
+
+        <ProgressBar
+            android:id="@+id/progressbar"
+            android:layout_width="@dimen/value_120"
+            android:layout_height="@dimen/value_120"
+            android:layout_gravity="center"
+            android:layout_marginTop="@dimen/value_48"
+            android:visibility="gone" />
+
+
+        <LinearLayout
+            android:id="@+id/layout_placeholder"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/value_48"
+            android:gravity="center"
+            android:orientation="vertical"
+            android:visibility="gone">
+
+            <ImageView
+                android:id="@+id/iv_placeholder_image"
+                android:layout_width="@dimen/value_120"
+                android:layout_height="wrap_content"
+                android:contentDescription="@string/no_favorites"
+                android:src="@drawable/nothing_found" />
+
+            <TextView
+                android:id="@+id/tv_placeholder_message"
+                style="@style/PlaceholderMessageTextStyle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="@dimen/value_24"
+                android:layout_marginTop="@dimen/value_16"
+                android:lines="2"
+                android:text="@string/no_playlists" />
+        </LinearLayout>
+
+    </LinearLayout>
 
 
 
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+
+
+</androidx.coordinatorlayout.widget.CoordinatorLayout>

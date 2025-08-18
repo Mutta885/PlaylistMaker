@@ -55,6 +55,21 @@
         <item name="android:textColorHint">@color/grey</item>
     </style>
 
+    <style name="MyEditTextMakerStyle">
+        <item name="fontFamily">@font/ys_display_regular</item>
+        <item name="android:textSize">@dimen/small_size</item>
+
+        <item name="android:textColorHint">?attr/colorOnPrimary</item>
+
+    </style>
+
+    <style name="MakerTexteditStyle" parent="Widget.MaterialComponents.TextInputLayout.OutlinedBox">
+        <item name="fontFamily">@font/ys_display_regular</item>
+        <item name="android:textSize">@dimen/small_size</item>
+        <item name="android:textFontWeight">400</item>
+
+    </style>
+
     <style name="MyIconForEditTextStyle">
         <item name="tint">@color/grey</item>
     </style>
@@ -279,7 +294,63 @@
 
     </style>
 
+    <style name="iv_playlist">
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSize">@dimen/value_8</item>
+    </style>
 
+    <style name="tv_playlist">
+        <item name="android:textColor">@color/dark</item>
+        <item name="android:fontFamily">@font/ys_display_regular</item>
+        <item name="android:textFontWeight">400</item>
+        <item name="android:textSize">@dimen/menu_size</item>
+    </style>
+
+    <style name="tv_playlist_player1">
+        <item name="android:textColor">@color/dark</item>
+        <item name="android:textSize">@dimen/small_size</item>
+        <item name="android:fontFamily">@font/ys_display_regular</item>
+        <item name="android:textFontWeight">400</item>
+    </style>
+
+    <style name="iv_playlist_player">
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSize">@dimen/value_2</item>
+    </style>
+
+    <style name="tv_playlist_player2">
+        <item name="android:textColor">@color/grey</item>
+        <item name="android:textSize">@dimen/playlist_player_size</item>
+        <item name="android:fontFamily">@font/ys_display_regular</item>
+        <item name="android:textFontWeight">400</item>
+    </style>
+
+    <style name="PlaceholderMessageTextStyle">
+        <item name="android:textColor">@color/black</item>
+        <item name="android:textSize">@dimen/error_size</item>
+        <item name="android:fontFamily">@font/ys_display_medium</item>
+        <item name="android:textFontWeight">400</item>
+        <item name="android:gravity">center</item>
+
+    </style>
+
+    <style name="AddToPlaylistStyle">
+        <item name="android:textColor">@color/black</item>
+        <item name="android:fontFamily">@font/ys_display_medium</item>
+        <item name="android:textFontWeight">500</item>
+        <item name="android:textSize">@dimen/error_size</item>
+    </style>
+
+    <style name="PlaceholderButtonStyle" parent="Widget.MaterialComponents.Button.UnelevatedButton">
+        <item name="android:textAllCaps">false</item>
+        <item name="android:backgroundTint">@color/black</item>
+        <item name="android:textColor">@color/white</item>
+        <item name="cornerRadius">@dimen/value_56</item>
+        <item name="android:fontFamily">@font/ys_display_medium</item>
+        <item name="android:textFontWeight">500</item>
+        <item name="android:textSize">@dimen/update_size</item>
+        <item name="android:layout_gravity">center_horizontal</item>
+    </style>
 
 
 </resources>

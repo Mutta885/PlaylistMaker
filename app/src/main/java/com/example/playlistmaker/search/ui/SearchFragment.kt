@@ -14,6 +14,7 @@ import android.view.inputmethod.InputMethodManager
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
+import androidx.navigation.fragment.findNavController
 import com.example.playlistmaker.R
 import com.example.playlistmaker.databinding.FragmentSearchBinding
 import com.example.playlistmaker.player.ui.Player
@@ -40,6 +41,8 @@ class SearchFragment : Fragment() {
     private var latestSearchText: String? = null
     private var searchJob: Job? = null
 
+    private var isClickAllowed = true
+
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         _binding = FragmentSearchBinding.inflate(inflater, container, false)
         return binding.root
@@ -47,13 +50,12 @@ class SearchFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
+        isClickAllowed = true
         binding.trackList.adapter = searchAdapter
 
         historyAdapter = SearchAdapter(historyTracks)
         binding.historyList.adapter = historyAdapter
 
-        val playerIntent = Intent(requireContext(), Player::class.java)
 
         searchAdapter.setOnClickListener(object : SearchAdapter.OnClickListener {
             override fun onClick(track: Track) {
@@ -61,8 +63,7 @@ class SearchFragment : Fragment() {
                 binding.historyLayout.isVisible = false
                 binding.trackList.isVisible = true
                 if (clickDebounce()) {
-                    playerIntent.putExtra("TRACK", Gson().toJson(track))
-                    startActivity(playerIntent)
+                    findNavController().navigate(SearchFragmentDirections.actionSearchFragmentToPlayer(Gson().toJson(track)))
                 }
             }
         })
@@ -73,8 +74,7 @@ class SearchFragment : Fragment() {
                 historyAdapter.notifyDataSetChanged()
 
                 if (clickDebounce()) {
-                    playerIntent.putExtra("TRACK", Gson().toJson(track))
-                    startActivity(playerIntent)
+                    findNavController().navigate(SearchFragmentDirections.actionSearchFragmentToPlayer(Gson().toJson(track)))
                 }
 
             }
@@ -209,7 +209,6 @@ class SearchFragment : Fragment() {
     }
 
 
-    private var isClickAllowed = true
 
 
     private fun clickDebounce() : Boolean {
