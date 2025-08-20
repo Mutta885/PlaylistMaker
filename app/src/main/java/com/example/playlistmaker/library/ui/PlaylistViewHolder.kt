@@ -13,8 +13,9 @@ class PlaylistViewHolder(private val parentView: View) : RecyclerView.ViewHolder
     fun bind(playlist: Playlist) = binding.apply {
 
         with(playlist) {
-            tvName.text = name
-            tvNumber.text = binding.root.resources.getQuantityString(R.plurals.tracks, playlist.tracksNumber, playlist.tracksNumber)
+            tvName.text = title
+            tvNumber.text = binding.root.resources.getQuantityString(R.plurals.tracks, playlist.tracksQuantity, playlist.tracksQuantity)
+
             val cover = if (coverPath.isNullOrEmpty()) R.drawable.placeholder
             else coverPath
 

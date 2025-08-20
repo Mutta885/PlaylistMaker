@@ -5,6 +5,7 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.playlistmaker.library.domain.db.FavoritesInteractor
+import com.example.playlistmaker.search.domain.models.Track
 import kotlinx.coroutines.launch
 
 class FavoritesFragmentViewModel(private val favoritesInteractor: FavoritesInteractor) : ViewModel() {
@@ -20,11 +21,32 @@ class FavoritesFragmentViewModel(private val favoritesInteractor: FavoritesInter
         }
     }
 
+    fun loadData() {
+        renderState(FavoritesState.Loading)
+        viewModelScope.launch {
+            favoritesInteractor
+                .getFavoriteTracks()
+                .collect { tracks ->
+                    processResult(tracks)
+                }
+        }
+
+    }
+
+    private fun processResult(tracks: List<Track>) {
+        if (tracks.isEmpty()) {
+            renderState(FavoritesState.Empty)
+        } else {
+            renderState(FavoritesState.Content(tracks))
+        }
+    }
+
+
     fun getFavorites() {
         renderState(FavoritesState.Loading)
 
         viewModelScope.launch {
-            favoritesInteractor.getFavorites().collect { favoriteTracks ->
+            favoritesInteractor.getFavoriteTracks().collect { favoriteTracks ->
                 if (favoriteTracks.isEmpty()) renderState(FavoritesState.Empty)
                 else renderState(FavoritesState.Content(favorites = favoriteTracks))
             }

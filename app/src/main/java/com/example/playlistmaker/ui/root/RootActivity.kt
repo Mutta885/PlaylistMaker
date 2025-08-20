@@ -30,7 +30,7 @@ class RootActivity : AppCompatActivity() {
 
         navController.addOnDestinationChangedListener { _, destination, _ ->
             when (destination.id) {
-                R.id.player, R.id.maker -> {
+                R.id.player, R.id.maker, R.id.playlist_screen -> {
                     bottomNavigationView.isVisible = false
                     binding.line.isVisible = false
                 }

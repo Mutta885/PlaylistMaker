@@ -1,18 +1,14 @@
 package com.example.playlistmaker.player.ui
 
-import android.app.Activity
-import android.icu.text.SimpleDateFormat
+
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.LinearLayout
 import android.widget.Toast
-import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
-import androidx.navigation.Navigation.findNavController
-import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.fragment.navArgs
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.resource.bitmap.RoundedCorners
@@ -22,14 +18,10 @@ import com.example.playlistmaker.library.ui.PlaylistAdapter
 import com.example.playlistmaker.search.domain.models.Track
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.gson.Gson
-import com.google.gson.reflect.TypeToken
 import org.koin.androidx.viewmodel.ext.android.viewModel
-import java.util.Locale
 import androidx.navigation.fragment.findNavController
 import com.example.playlistmaker.library.domain.models.Playlist
-import com.example.playlistmaker.library.ui.MakerFragment
 import com.example.playlistmaker.library.ui.PlaylistsState
-import com.example.playlistmaker.ui.root.RootActivity
 
 class Player : Fragment() {
 
@@ -78,7 +70,7 @@ class Player : Fragment() {
                     //val currentTrack = playerState.track
                     val albumTemp = currentTrack.collectionName
                     viewModel.isFavoriteState(currentTrack.trackId)
-                    binding.trackTimeValue.text = SimpleDateFormat("mm:ss", Locale.getDefault()).format(currentTrack.trackTime)
+                    binding.trackTimeValue.text = currentTrack.trackTime// SimpleDateFormat("mm:ss", Locale.getDefault()).format(currentTrack.trackTime)
 
                     if (albumTemp.isEmpty()){
                         binding.albumValue.isVisible = false
@@ -95,7 +87,7 @@ class Player : Fragment() {
                     binding.trackName.text = currentTrack.trackName
                     binding.artistName.text = currentTrack.artistName
                     binding.albumValue.text = currentTrack.collectionName
-                    val bigCover = currentTrack.artworkUrl100.replaceAfterLast('/',"512x512bb.jpg")
+                    val bigCover = currentTrack.artworkUrl100  //.replaceAfterLast('/',"512x512bb.jpg")
 
                     Glide.with(requireContext())
                         .load(bigCover)
@@ -119,7 +111,10 @@ class Player : Fragment() {
                 else -> {}
 
             }
+
         }
+        viewModel.isFavoriteState(currentTrack.trackId)
+
 
         viewModel.PlaylistsLiveData.observe(viewLifecycleOwner) { state ->
                 managePlaylists(state)
@@ -129,18 +124,14 @@ class Player : Fragment() {
                 bottomSheetBehavior?.state = BottomSheetBehavior.STATE_HIDDEN
             }
 
-
-
         viewModel.isFavoriteLiveData.observe(viewLifecycleOwner) { isFavorite ->
-            if (isFavorite) {
-                binding.toFavoriteButton.setImageResource(R.drawable.to_favorite_true)
-            } else {
-                binding.toFavoriteButton.setImageResource(R.drawable.to_favorite)
-            }
+            turnFavorite(isFavorite)
         }
 
+
+
         binding.toFavoriteButton.setOnClickListener(){
-            viewModel.swithFavorite(currentTrack)
+            viewModel.swithFavorite()
         }
 
 
@@ -157,10 +148,20 @@ class Player : Fragment() {
         }
 
         binding.btCreatePlaylist.setOnClickListener {
-            findNavController().navigate(PlayerDirections.actionPlayerFragmentToMakerFragment())
+            findNavController().navigate(PlayerDirections.actionPlayerFragmentToMakerFragment(playlist = null))
         }
 
     }
+
+    private fun turnFavorite(isFavorite: Boolean) {
+        binding.toFavoriteButton.apply {
+            if (isFavorite)
+                setImageResource(R.drawable.to_favorite_true)
+            else
+                setImageResource(R.drawable.to_favorite)
+        }
+    }
+
 
     private fun managePlaylists(state: PlaylistsState) {
         when (state) {

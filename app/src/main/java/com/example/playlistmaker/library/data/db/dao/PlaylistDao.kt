@@ -9,10 +9,15 @@ import com.example.playlistmaker.library.data.db.entity.PlaylistEntity
 @Dao
 interface PlaylistDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertNewPlaylist(playlist: PlaylistEntity)
-
+    suspend fun insertOrUpdatePlaylist(playlist: PlaylistEntity)
 
     @Query("SELECT * FROM playlist_table")
-    suspend fun getPlaylists(): List<PlaylistEntity>
+    suspend fun getAllPlaylists(): List<PlaylistEntity>
+
+    @Query("SELECT * FROM playlist_table WHERE id = :id")
+    suspend fun getPlaylistById(id: Int): PlaylistEntity
+
+    @Query("DELETE FROM playlist_table WHERE id = :id")
+    suspend fun deletePlaylistById(id: Int)
 
 }

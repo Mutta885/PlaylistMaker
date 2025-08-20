@@ -35,32 +35,38 @@ class PlayerViewModel(private val playerInteractor : PlayerInteractor, private v
     val TrackAddedLiveData : LiveData<String> = trackAddedLiveDataMutable
 
     private var timerJob: Job? = null
-    private var currentTrack: Track? = null
+    private var currentTrack: Track ? = null
 
     init {
        playerStateLiveDataMutable.postValue(PlayerState.Default())
     }
 
-    fun isFavoriteState(trackId : Long){
+    fun isFavoriteState(trackId : Int){
         viewModelScope.launch{
-            isFavoriteLiveDataMutable.postValue(favoritesInteractor.isFavorite(trackId))
+            //isFavoriteLiveDataMutable.postValue(favoritesInteractor.isFavorite(trackId))
+            val isFavorite = favoritesInteractor.checkIfTrackIsFavorite(trackId)
+            isFavoriteLiveDataMutable.postValue( isFavorite)
+            currentTrack = currentTrack!!.copy(inFavorite = isFavorite)
+
         }
     }
 
-    fun swithFavorite(track: Track) {
 
-        viewModelScope.launch {
-            if (track.isFavorite) {
-                favoritesInteractor.deleteFromFavorites(track)
-                track.isFavorite = false
-            } else {
-                favoritesInteractor.insertNewFavorite(track)
-                track.isFavorite = true
+    fun swithFavorite() {
+
+        val trackFavorited = currentTrack!!.inFavorite
+        val newTrack = currentTrack!!.copy(inFavorite = !trackFavorited)
+        //if (trackFavorited == false) {
+
+            viewModelScope.launch {
+                favoritesInteractor.changeFavorites(newTrack)
+
             }
-            isFavoriteLiveDataMutable.postValue(track.isFavorite)
-        }
 
-        currentTrack = track
+        //}
+        currentTrack = newTrack
+        isFavoriteLiveDataMutable.postValue( !trackFavorited)
+
     }
 
     fun getPlaylists() {
@@ -85,11 +91,12 @@ class PlayerViewModel(private val playerInteractor : PlayerInteractor, private v
 
     fun addTrackToPlaylist(playlist: Playlist) {
 
-        if (playlist.trackList.contains(currentTrack?.trackId.toString())) {
+        val trackIds = playlist.tracks.map { it.trackId }
+        if (trackIds.contains(currentTrack!!.trackId)) {
             trackAddedLiveDataMutable.value =
                 strContext.getString(
                     R.string.already_exist,
-                    playlist.name
+                    playlist.title
                 )
         } else {
 
@@ -98,7 +105,7 @@ class PlayerViewModel(private val playerInteractor : PlayerInteractor, private v
                     trackAddedLiveDataMutable.value =
                         strContext.getString(
                             R.string.added,
-                            playlist.name
+                            playlist.title
                         )
                     getPlaylists()
                 }

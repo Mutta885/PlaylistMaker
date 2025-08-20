@@ -8,6 +8,7 @@ import com.example.playlistmaker.search.domain.models.Track
 import com.example.playlistmaker.utils.Resource
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
+import com.example.playlistmaker.library.data.toDomain
 
 class SongsRepositoryImpl(private val networkClient: NetworkClient) : SongsRepository {
 
@@ -19,7 +20,8 @@ class SongsRepositoryImpl(private val networkClient: NetworkClient) : SongsRepos
             }
             200 -> {
                 emit (Resource.Success ((response as SongsResponse).results.map {
-                    Track(it.trackId, it.trackName, it.artistName, it.trackTime, it.artworkUrl100, it.collectionName, it.releaseDate, it.primaryGenreName, it.country, it.previewUrl) }))
+
+                    it.toDomain()}))
             }
             else -> {
                 emit(Resource.Error("Ошибка сервера")) //emptyList()

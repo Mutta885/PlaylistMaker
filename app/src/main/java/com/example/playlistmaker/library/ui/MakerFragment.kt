@@ -27,8 +27,10 @@ import com.example.playlistmaker.databinding.FragmentMakerBinding
 import com.example.playlistmaker.library.domain.models.Playlist
 import com.example.playlistmaker.library.ui.MakerViewModel.CreatingPlaylistState
 import androidx.navigation.fragment.findNavController
+import androidx.navigation.fragment.navArgs
 import com.bumptech.glide.Glide
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.google.gson.Gson
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import java.io.File
 import java.io.FileOutputStream
@@ -36,7 +38,7 @@ import java.io.FileOutputStream
 
 class MakerFragment : Fragment() {
     private var _binding: FragmentMakerBinding? = null
-    private val binding: FragmentMakerBinding get() = requireNotNull(_binding) { "Binding wasn't initialized" }
+    private val binding: FragmentMakerBinding get() = requireNotNull(_binding) { }
 
     private val viewModel: MakerViewModel by viewModel<MakerViewModel>()
 
@@ -46,6 +48,9 @@ class MakerFragment : Fragment() {
     private var newPlaylistCoverPath: String? = null
     private var isCreationStarted  = false
 
+    private var savedPlaylist: Playlist? = null
+    private val args by navArgs <MakerFragmentArgs>()
+
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,savedInstanceState: Bundle?): View {
         _binding = FragmentMakerBinding.inflate(inflater, container, false)
         return binding.root
@@ -54,27 +59,20 @@ class MakerFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        val jsonPlaylist = args.playlist
+        savedPlaylist = Gson().fromJson(jsonPlaylist, Playlist::class.java)
+
         binding.apply {
             myToolbar.setNavigationOnClickListener {
-                showExitConfirmationDialog()
+                checkIfSaveIsNeeded()
             }
             inputPlaylistTitle.addTextChangedListener(getTextWatcher(InputType.TITLE))
             inputPlaylistDescription.addTextChangedListener(getTextWatcher(InputType.DESCRIPTION))
-            buttonCreate.setOnClickListener {
-                viewModel.savePlaylist(
-                    Playlist(
-                        id = 0,
-                        name = newPlaylistTitle,
-                        description = newPlaylistDescription,
-                        coverPath = newPlaylistCoverPath,
-                        trackList = listOf(),
-                        tracksNumber = 0
-                    )
-                )
-            }
+
         }
 
-        viewModel.observeState().observe(viewLifecycleOwner) {
+        viewModel.checkIfSavedPlaylistExist(savedPlaylist)
+        viewModel.observeState().observe(viewLifecycleOwner){
             render(it)
         }
 
@@ -84,21 +82,84 @@ class MakerFragment : Fragment() {
             viewLifecycleOwner,
             object : OnBackPressedCallback(true) {
                 override fun handleOnBackPressed() {
-                    showExitConfirmationDialog()
+                    checkIfSaveIsNeeded()
                 }
             })
 
     }
 
+
     private fun render(state: CreatingPlaylistState) {
         when (state) {
             CreatingPlaylistState.Loading -> showProgressBar()
-            is CreatingPlaylistState.Success -> {
-                showToast(state.name)
-                findNavController().navigateUp()
+            CreatingPlaylistState.NewPlaylistState -> setCreatingScreen()
+            is CreatingPlaylistState.Success -> processSavingResult(state.message)
+            is CreatingPlaylistState.EditingPlaylist -> setEditingScreen(state.playlist)
+        }
+    }
+
+
+    private fun setEditingScreen(playlist: Playlist) {
+        binding.apply {
+            with(playlist) {
+                myToolbar.title = getString(R.string.edit)
+                buttonCreate.text = getString(R.string.save)
+
+                if (playlist.coverPath != null) {
+                    newPlaylistCoverPath = coverPath
+                    Glide.with(requireActivity())
+                        .load(coverPath)
+                        .centerCrop()
+                        .into(playlistImage)
+                }
+
+                newPlaylistTitle = title
+                inputPlaylistTitle.setText(title)
+                if (description != null) {
+                    inputPlaylistDescription.setText(description)
+                    newPlaylistDescription = description
+                }
+
+                buttonCreate.setOnClickListener {
+                    viewModel.savePlaylist(
+                        Playlist(
+                            id = id,
+                            title = newPlaylistTitle,
+                            description = newPlaylistDescription,
+                            coverPath = newPlaylistCoverPath,
+                            tracks = tracks,
+                            tracksQuantity = tracksQuantity
+                        )
+                    )
+                }
             }
         }
     }
+
+
+    private fun setCreatingScreen() {
+        binding.buttonCreate.setOnClickListener {
+            viewModel.savePlaylist(
+                Playlist(
+                    id = 0,
+                    title = newPlaylistTitle,
+                    description = newPlaylistDescription,
+                    coverPath = newPlaylistCoverPath,
+                    tracks = listOf(),
+                    tracksQuantity = 0
+                )
+            )
+        }
+    }
+
+
+    private fun processSavingResult(message: String?) {
+        if (message != null) {
+            showToast(message)
+        }
+        findNavController().navigateUp()
+    }
+
 
     private fun showProgressBar() {
         binding.apply {
@@ -107,6 +168,7 @@ class MakerFragment : Fragment() {
         }
 
     }
+
 
     private fun setPhotoPicker() {
         val pickMedia =
@@ -121,8 +183,6 @@ class MakerFragment : Fragment() {
                         .centerCrop()
                         .placeholder(R.drawable.placeholder)
                         .into(binding.playlistImage)
-                } else {
-                    Log.d("PhotoPicker", "No media selected")
                 }
             }
 
@@ -225,6 +285,14 @@ class MakerFragment : Fragment() {
         )
     }
 
+    private fun checkIfSaveIsNeeded() {
+        val currentState = viewModel.observeState().value
+        if (currentState is CreatingPlaylistState.NewPlaylistState) showExitConfirmationDialog()
+        else {
+            findNavController().navigateUp()
+        }
+    }
+
     private fun showExitConfirmationDialog() {
 
         if (isCreationStarted ) {
@@ -241,7 +309,7 @@ class MakerFragment : Fragment() {
 
     private fun showToast(title: String) {
 
-        Toast.makeText(requireActivity(), getString(R.string.created_sucks_1 ) + " $title " + getString(R.string.created_sucks_2 ), Toast.LENGTH_SHORT)
+        Toast.makeText(requireActivity(), title, Toast.LENGTH_SHORT)
             .show()
     }
 

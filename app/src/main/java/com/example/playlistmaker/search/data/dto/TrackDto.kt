@@ -1,18 +1,18 @@
 package com.example.playlistmaker.search.data.dto
 
-import com.google.gson.annotations.SerializedName
+
 
 data class TrackDto (
-    val trackId: Long,
-    val trackName: String,          // Название композиции
-    val artistName: String,         // Имя исполнителя
-    @SerializedName("trackTimeMillis")
-    val trackTime: Long,            // Продолжительность трека
-    val artworkUrl100: String,      // Ссылка на изображение обложки
-    val collectionName: String,     // Название альбома
-    val releaseDate: String,        // Год релиза трека
-    val primaryGenreName: String,   // Жанр трека
-    val country: String,            // Страна исполнителя
-    val previewUrl : String         // Ссылка на отрывок трека
 
+    val trackName: String?,
+    val artistName: String?,
+    val trackTimeMillis: Int?,
+    val trackTime: String?,
+    val artworkUrl100: String?,
+    val trackId: Int?,
+    val collectionName: String?,
+    val releaseDate: String?,
+    val primaryGenreName: String?,
+    val country: String?,
+    val previewUrl: String?
 )
