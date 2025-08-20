@@ -1,37 +1,19 @@
 package com.example.playlistmaker.search.domain.models
 
-import androidx.room.PrimaryKey
-import com.example.playlistmaker.library.data.db.entity.TrackEntity
-import com.google.gson.annotations.SerializedName
-import java.lang.System.currentTimeMillis
 
-data class Track (
-    val trackId: Long,
-    val trackName: String,          // Название композиции
-    val artistName: String,         // Имя исполнителя
-    @SerializedName("trackTimeMillis")
-    val trackTime: Long,            // Продолжительность трека
-    val artworkUrl100: String,      // Ссылка на изображение обложки
-    val collectionName: String,     // Название альбома
-    val releaseDate: String,        // Год релиза трека
-    val primaryGenreName: String,   // Жанр трека
-    val country: String,            // Страна исполнителя
-    val previewUrl: String,         // Ссылка на отрывок трека
-    var isFavorite: Boolean = false
+data class Track
+    (
+    val trackName: String,
+    val artistName: String,
+    val trackTimeMillis: Int,
+    val trackTime: String = "00:00",
+    val artworkUrl100: String,
+    val trackId: Int,
+    val collectionName: String,
+    val releaseDate: String,
+    val primaryGenreName: String,
+    val country: String,
+    val previewUrl: String,
+    val coverArtwork: String,
+    var inFavorite: Boolean = false
 )
-
-fun Track.toTrackEntity(): TrackEntity {
-    return TrackEntity(
-        trackId,
-        trackName,
-        artistName,
-        trackTime,
-        artworkUrl100,
-        collectionName,
-        releaseDate,
-        primaryGenreName,
-        country,
-        previewUrl,
-        currentTimeMillis()
-    )
-}

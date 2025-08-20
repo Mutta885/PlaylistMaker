@@ -7,7 +7,6 @@ import android.view.ViewGroup
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
-import com.example.playlistmaker.R
 import com.example.playlistmaker.databinding.FragmentPlaylistsBinding
 import com.example.playlistmaker.library.domain.models.Playlist
 import org.koin.androidx.viewmodel.ext.android.viewModel
@@ -29,13 +28,18 @@ class PlaylistsFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         binding.newPlaylistButton.setOnClickListener {
             findNavController().navigate(
-                LibraryFragmentDirections.actionLibraryFragmentToMakerFragment()
+                LibraryFragmentDirections.actionLibraryFragmentToMakerFragment(playlist = null)
             )
         }
 
         adapter = PlaylistAdapter(
             viewType = PlaylistAdapter.FROM_PLAYLIST,
-            onItemClick = { playlist -> })  //23 sprint
+            onItemClick = { playlist ->
+
+                findNavController().navigate(
+                    LibraryFragmentDirections.actionLibraryFragmentToPlaylistScreenFragment(playlist.id)
+                )
+            })  //23 sprint
         binding.recyclerView.adapter = adapter
         viewModel.fillData()
         viewModel.observeState().observe(viewLifecycleOwner) {
@@ -69,6 +73,11 @@ class PlaylistsFragment : Fragment() {
         adapter?.clearList()
         adapter?.submitList(playlists as ArrayList)
         adapter?.notifyDataSetChanged()
+    }
+
+    override fun onResume() {
+        super.onResume()
+        viewModel.fillData()
     }
 
 

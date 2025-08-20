@@ -1,24 +1,17 @@
 package com.example.playlistmaker.library.ui
 
-import android.annotation.SuppressLint
-import android.content.Intent
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.repeatOnLifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import com.example.playlistmaker.databinding.FragmentFavoritesBinding
-import com.example.playlistmaker.player.ui.Player
 import com.example.playlistmaker.search.domain.models.Track
 import com.example.playlistmaker.search.ui.SearchAdapter
-import com.example.playlistmaker.search.ui.SearchFragment
 import com.google.gson.Gson
-import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.koin.androidx.viewmodel.ext.android.viewModel
@@ -47,7 +40,7 @@ class FavoritesFragment : Fragment() {
 
         favoritesAdapter = SearchAdapter(favoritesTracks)
         binding.favoriteList.adapter = favoritesAdapter
-
+        viewModel.loadData()
         viewModel.favoriteStateLiveData.observe(viewLifecycleOwner) {favoriteState ->
             when (favoriteState) {
                 is FavoritesState.Empty -> showEmpty()
@@ -86,11 +79,11 @@ class FavoritesFragment : Fragment() {
         binding.placeholderImage.isVisible = false
     }
 
-      private fun showContent(favoriteState: FavoritesState.Content) {
+    private fun showContent(favoriteState: FavoritesState.Content) {
 
-       favoritesTracks.clear()
+        favoritesTracks.clear()
 
-       favoritesTracks.addAll(favoriteState.favorites)
+        favoritesTracks.addAll(favoriteState.favorites)
         binding.favoriteList.adapter?.notifyDataSetChanged()
 
 
